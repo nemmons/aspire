@@ -3,15 +3,20 @@ from .RatingStep import \
     Set, \
     Lookup, \
     Multiply, \
-    Round
+    Round, \
+    LinearInterpolate
 
 from .RatingStepParameter import \
     RatingStepParameter, \
     RatingStepParameterType
 
-from ..repo.RatingFactorRepository import AbstractRatingFactorRepository
+from flask_rater.repo.RatingFactorRepository import AbstractRatingFactorRepository
 
 from .RatingStepCondition import ComparisonOperation, LogicalOperation
+
+from copy import deepcopy
+
+import unittest
 
 
 def test_evaluate_literal():
@@ -353,3 +358,63 @@ def test_lookup_step_options():
 
     output = lookup_step.run({})
     assert 'test' in output and output['test'] == '1'
+
+
+def test_linear_interpolate_step():
+    class FakeRatingFactor(object):
+        def __init__(self, x, value):
+            self.x = x
+            self.value = value
+
+    class MockFactorRepo(AbstractRatingFactorRepository):
+        def __init__(self):
+            super().__init__()
+            pass
+
+        def lookup(self, rating_factor_type: str, params: dict, options: dict = None):
+            pass
+
+        def get_factor(self, rating_factor_type: str, params: dict, options=None):
+            if 'step_down' in options:
+                return FakeRatingFactor(5, 25)
+            elif 'step_up' in options:
+                return FakeRatingFactor(10, 40)
+            else:
+                raise Exception("Bad Test Input")
+
+    linear_interpolate_step = LinearInterpolate(
+        'result',
+        [
+            RatingStepParameter('rating_factor_type', 'whatever', RatingStepParameterType.LITERAL),
+            RatingStepParameter('options', 'interpolate:x', RatingStepParameterType.LITERAL),
+            RatingStepParameter('x', 'x', RatingStepParameterType.VARIABLE),
+        ],
+        MockFactorRepo()
+    )
+    linear_interpolate_step2 = deepcopy(linear_interpolate_step)  # running the step is destructive to the params
+    linear_interpolate_step3 = deepcopy(linear_interpolate_step)
+
+    output = linear_interpolate_step.run({'x': 7})
+    assert output['result'] == '31.0'
+
+    output = linear_interpolate_step2.run({'x': 5})
+    assert output['result'] == '25.0'
+
+    output = linear_interpolate_step3.run({'x': 10})
+    assert output['result'] == '40.0'
+
+    class MissingInterpolateValue(unittest.TestCase):
+        def test(self):
+            step = LinearInterpolate(
+                'result',
+                [
+                    RatingStepParameter('rating_factor_type', 'whatever', RatingStepParameterType.LITERAL),
+                    RatingStepParameter('options', 'interpolate:y', RatingStepParameterType.LITERAL),
+                    RatingStepParameter('x', 'x', RatingStepParameterType.VARIABLE),
+                ],
+                MockFactorRepo()
+            )
+            with self.assertRaises(ValueError):
+                step.run({'x': 5})
+    test = MissingInterpolateValue()
+    test.test()
