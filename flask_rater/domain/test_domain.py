@@ -1,6 +1,7 @@
 from .RatingStep import \
     Add, \
     Set, \
+    Lookup, \
     Multiply, \
     Round
 
@@ -8,12 +9,13 @@ from .RatingStepParameter import \
     RatingStepParameter, \
     RatingStepParameterType
 
+from ..repo.RatingFactorRepository import AbstractRatingFactorRepository
+
 from .RatingStepCondition import ComparisonOperation, LogicalOperation
 
 
 def test_evaluate_literal():
     param = RatingStepParameter('test', 5, RatingStepParameterType.LITERAL)
-    assert str(param) == 'test'
 
     result = param.evaluate({})
     assert result == 5
@@ -168,6 +170,54 @@ def test_set_rating_step_from_variable():
     assert result['new_rate'] == '150'
 
 
+class MockRatingFactorRepository(AbstractRatingFactorRepository):
+    def __init__(self):
+        super().__init__()
+        pass
+
+    def lookup(self, rating_factor_type: str, params: dict, options: dict = None):
+        if rating_factor_type == 'multiply_test':
+            return params['base_rate_1'] * params['base_rate_2']
+        elif rating_factor_type == 'add_test':
+            return params['base_rate_1'] + params['base_rate_2']
+        elif rating_factor_type == 'base_rate':
+            return params['coverage'] * 5
+
+    def get_factor(self, rating_factor_type: str, params: dict, options=None):
+        pass
+
+
+def test_lookup_step():
+    repo = MockRatingFactorRepository()
+    rating_variables = {}
+
+    lookup_step = Lookup(
+        'multiply_test',
+        [
+            RatingStepParameter('factor_type', 'multiply_test', RatingStepParameterType.LITERAL),
+            RatingStepParameter('base_rate_1', 10, RatingStepParameterType.LITERAL),
+            RatingStepParameter('base_rate_2', 15, RatingStepParameterType.LITERAL),
+        ],
+        repo
+    )
+
+    rating_variables = lookup_step.apply(rating_variables)
+    assert rating_variables['multiply_test'] == 150
+
+    lookup_step = Lookup(
+        'add_test',
+        [
+            RatingStepParameter('factor_type', 'add_test', RatingStepParameterType.LITERAL),
+            RatingStepParameter('base_rate_1', 10, RatingStepParameterType.LITERAL),
+            RatingStepParameter('base_rate_2', 15, RatingStepParameterType.LITERAL),
+        ],
+        repo
+    )
+
+    rating_variables = lookup_step.apply(rating_variables)
+    assert rating_variables['add_test'] == 25
+
+
 def test_binary_operator_comparisons():
     test_cases = [
         ['<', 5, 4, True],
@@ -275,3 +325,31 @@ def test_rating_step_conditions():
 
     output = rating_step.run({'x': 6})
     assert output == {'x': 6}
+
+
+def test_lookup_step_options():
+    class MockFactorRepo(AbstractRatingFactorRepository):
+        def __init__(self):
+            super().__init__()
+            pass
+
+        def lookup(self, rating_factor_type: str, params: dict, options: dict = None):
+            if 'x' in options and options['x'] == 'yes':
+                return '1'
+            else:
+                return '0'
+
+        def get_factor(self, rating_factor_type: str, params: dict, options=None):
+            pass
+
+    lookup_step = Lookup(
+        'test',
+        [
+            RatingStepParameter('rating_factor_type', 'whatever', RatingStepParameterType.LITERAL),
+            RatingStepParameter('options', 'x:yes', RatingStepParameterType.LITERAL),
+        ],
+        MockFactorRepo()
+    )
+
+    output = lookup_step.run({})
+    assert 'test' in output and output['test'] == '1'
