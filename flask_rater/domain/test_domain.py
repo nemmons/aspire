@@ -6,11 +6,18 @@ from .RatingStep import \
     Round, \
     LinearInterpolate
 
+from .Rater import Rater
+
+from .RatingManual import RatingManual
+
 from .RatingStepParameter import \
     RatingStepParameter, \
     RatingStepParameterType
 
 from flask_rater.repo.RatingFactorRepository import AbstractRatingFactorRepository
+from flask_rater.repo.RatingManualRepository import AbstractRatingManualRepository
+
+from flask_rater.domain import Rater
 
 from .RatingStepCondition import ComparisonOperation, LogicalOperation
 
@@ -223,6 +230,47 @@ def test_lookup_step():
     assert rating_variables['add_test'] == 25
 
 
+def test_rater_e2e():
+    class MockRatingManualRepository(AbstractRatingManualRepository):
+        def __init__(self):
+            super().__init__()
+
+        def get(self, rating_manual_id=None):
+            lookup_repo = MockRatingFactorRepository()
+
+            rating_steps = [
+                Lookup(
+                    'base_rate',
+                    [
+                        RatingStepParameter('factor_type', 'base_rate', RatingStepParameterType.LITERAL),
+                        RatingStepParameter('coverage', 'coverage', RatingStepParameterType.VARIABLE),
+                    ],
+                    lookup_repo
+                ),
+                Set(
+                    'surcharge',
+                    [RatingStepParameter('surcharge_amt', 450, RatingStepParameterType.LITERAL),]
+                ),
+                Add(
+                    'rate',
+                    [
+                        RatingStepParameter('base_rate', 'base_rate', RatingStepParameterType.VARIABLE),
+                        RatingStepParameter('surcharge', 'surcharge', RatingStepParameterType.VARIABLE),
+                    ]
+                ),
+            ]
+            return RatingManual("test", "test", rating_steps)
+
+        def store(self, rating_manual_id=None):
+            pass
+
+    manual_repo = MockRatingManualRepository()
+    manual = manual_repo.get()
+    rater = Rater.Rater(manual)
+    result = rater.rate({'coverage': 50})
+    assert result == '700.0'
+
+
 def test_binary_operator_comparisons():
     test_cases = [
         ['<', 5, 4, True],
@@ -311,6 +359,26 @@ def test_bad_operations():
     bad_logical = LogicalOperation('???', [])
     assert bad_logical.check({}) is False
     assert str(bad_logical) == ''
+
+
+def test_rater_output():
+    rating_steps = [
+        Set(
+            'some_value',
+            [RatingStepParameter('test', 50, RatingStepParameterType.LITERAL)]
+        ),
+        Set(
+            'rate',
+            [RatingStepParameter('test', 100, RatingStepParameterType.LITERAL)]
+        )
+    ]
+    rating_manual = RatingManual('Test Rating Manual', 'for testing', rating_steps)
+    rater = Rater.Rater(rating_manual)
+
+    rate = rater.rate({})
+    assert rate == '100'
+    assert rater.check_output('some_value') == '50'
+    assert rater.check_output('nothing') is None
 
 
 def test_rating_step_conditions():
