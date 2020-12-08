@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import IntEnum
 from typing import List
 from ..repo.RatingFactorRepository import AbstractRatingFactorRepository
 from .RatingStepParameter import RatingStepParameter
@@ -7,7 +7,7 @@ from functools import reduce
 from .RatingStepCondition import AbstractRatingStepCondition
 
 
-class RatingStepType(Enum):
+class RatingStepType(IntEnum):
     ADD = 1
     SET = 2
     MULTIPLY = 3
@@ -84,7 +84,7 @@ class Round(AbstractRatingStep):
         self.conditions = conditions
 
     def apply(self, rating_variables: dict):
-        decimal_places = self.places.evaluate(rating_variables)
+        decimal_places = int(self.places.evaluate(rating_variables))
         value_to_round = float(self.value.evaluate(rating_variables))
         rating_variables[self.target] = str(round(value_to_round, decimal_places))
         return rating_variables
