@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 from flask_rater.database import Base
 from typing import List
@@ -75,11 +75,12 @@ class RatingFactor(Base):
     id = Column(Integer, primary_key=True)
     rating_manual_id = Column(Integer, ForeignKey('rating_manuals.id'))
     type = Column(String(20))
-    col_1 = Column(String(20))
-    col_2 = Column(String(20))
-    col_3 = Column(String(20))
-    col_4 = Column(String(20))
-    col_5 = Column(String(20))
+    num_col_1 = Column(Numeric(12, 4))
+    num_col_2 = Column(Numeric(12, 4))
+    num_col_3 = Column(Numeric(12, 4))
+    str_col_1 = Column(String(20))
+    str_col_2 = Column(String(20))
+    str_col_3 = Column(String(20))
     value = Column(String)
 
     rating_manual = relationship("RatingManual")
