@@ -5,15 +5,18 @@ from ..repo.RatingFactorRepository import AbstractRatingFactorRepository
 from .RatingStepParameter import RatingStepParameter
 from functools import reduce
 from .RatingStepCondition import AbstractRatingStepCondition
+import operator
 
 
 class RatingStepType(IntEnum):
-    ADD = 1
-    SET = 2
-    MULTIPLY = 3
-    ROUND = 4
-    LOOKUP = 5
-    LINEAR_INTERPOLATE = 6
+    SET = 1
+    ADD = 2
+    SUBTRACT = 3
+    MULTIPLY = 4
+    DIVIDE = 5
+    ROUND = 6
+    LOOKUP = 7
+    LINEAR_INTERPOLATE = 8
 
 
 class AbstractRatingStep(ABC):
@@ -32,34 +35,40 @@ class AbstractRatingStep(ABC):
         pass
 
 
-class Add(AbstractRatingStep):
+class BaseArithmeticRatingStep(AbstractRatingStep):
+    operation: operator
+
     def __init__(self, target: str, parameters: List[RatingStepParameter], conditions: AbstractRatingStepCondition = None):
         super().__init__()
         self.target = target
         self.operands = parameters
         self.conditions = conditions
 
+    def evaluate_operands(self, rating_variables: dict):
+        return map(lambda operand: float(operand.evaluate(rating_variables)), self.operands)
+
     def apply(self, rating_variables: dict):
-        operands = map(lambda operand: float(operand.evaluate(rating_variables)), self.operands)
-        result = reduce(lambda x, y: x+y, operands)
+        operands = self.evaluate_operands(rating_variables)
+        result = reduce(lambda x, y: self.operation(x, y), operands)
 
         rating_variables[self.target] = str(result)
         return rating_variables
 
 
-class Multiply(AbstractRatingStep):
-    def __init__(self, target: str, parameters: List[RatingStepParameter], conditions: AbstractRatingStepCondition = None):
-        super().__init__()
-        self.target = target
-        self.operands = parameters
-        self.conditions = conditions
+class Add(BaseArithmeticRatingStep):
+    operation = operator.add
 
-    def apply(self, rating_variables: dict):
-        operands = map(lambda operand: float(operand.evaluate(rating_variables)), self.operands)
-        result = reduce(lambda x, y: x*y, operands)
 
-        rating_variables[self.target] = str(result)
-        return rating_variables
+class Subtract(BaseArithmeticRatingStep):
+    operation = operator.sub
+
+
+class Multiply(BaseArithmeticRatingStep):
+    operation = operator.mul
+
+
+class Divide(BaseArithmeticRatingStep):
+    operation = operator.truediv
 
 
 class Set(AbstractRatingStep):

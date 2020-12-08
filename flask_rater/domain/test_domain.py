@@ -1,10 +1,4 @@
-from .RatingStep import \
-    Add, \
-    Set, \
-    Lookup, \
-    Multiply, \
-    Round, \
-    LinearInterpolate
+from .RatingStep import Set, Add, Subtract, Multiply, Divide, Round, Lookup, LinearInterpolate
 
 from .Rater import Rater
 
@@ -58,6 +52,26 @@ def test_add_rating_step():
     assert result['rate'] == '12.0'
 
 
+def test_subtract_rating_step():
+    rating_variables = {
+        'rate_part_1': 15,
+        'rate_part_2': 7,
+        'rate_part_3': 1,
+    }
+
+    add_step = Subtract(
+        'rate',
+        [
+            RatingStepParameter('rate_part_1', 'rate_part_1', RatingStepParameterType.VARIABLE),
+            RatingStepParameter('rate_part_2', 'rate_part_2', RatingStepParameterType.VARIABLE),
+            RatingStepParameter('rate_part_3', 'rate_part_3', RatingStepParameterType.VARIABLE),
+        ]
+    )
+
+    result = add_step.apply(rating_variables)
+    assert result['rate'] == '7.0'
+
+
 def test_multiply_rating_step():
     rating_variables = {
         'rate_part_1': 5,
@@ -74,6 +88,26 @@ def test_multiply_rating_step():
 
     result = multiply_step.apply(rating_variables)
     assert result['rate'] == '35.0'
+
+
+def test_divide_rating_step():
+    rating_variables = {
+        'rate_part_1': 35,
+        'rate_part_2': 7,
+        'rate_part_3': 2,
+    }
+
+    multiply_step = Divide(
+        'rate',
+        [
+            RatingStepParameter('rate_part_1', 'rate_part_1', RatingStepParameterType.VARIABLE),
+            RatingStepParameter('rate_part_2', 'rate_part_2', RatingStepParameterType.VARIABLE),
+            RatingStepParameter('rate_part_3', 'rate_part_3', RatingStepParameterType.VARIABLE),
+        ]
+    )
+
+    result = multiply_step.apply(rating_variables)
+    assert result['rate'] == '2.5'
 
 
 def test_round_rating_step():

@@ -52,12 +52,16 @@ class RatingManualRepository(AbstractRatingManualRepository):
         params = self.create_rating_step_parameters(data.rating_step_parameters)
         conditions = self.create_rating_step_conditions(data.conditions)
 
-        if rating_step_type == RatingStep.RatingStepType.ADD:
-            step = RatingStep.Add(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.SET:
+        if rating_step_type == RatingStep.RatingStepType.SET:
             step = RatingStep.Set(data.target, params, conditions)
+        elif rating_step_type == RatingStep.RatingStepType.ADD:
+            step = RatingStep.Add(data.target, params, conditions)
+        elif rating_step_type == RatingStep.RatingStepType.SUBTRACT:
+            step = RatingStep.Subtract(data.target, params, conditions)
         elif rating_step_type == RatingStep.RatingStepType.MULTIPLY:
             step = RatingStep.Multiply(data.target, params, conditions)
+        elif rating_step_type == RatingStep.RatingStepType.DIVIDE:
+            step = RatingStep.Divide(data.target, params, conditions)
         elif rating_step_type == RatingStep.RatingStepType.ROUND:
             step = RatingStep.Round(data.target, params, conditions)
         elif rating_step_type == RatingStep.RatingStepType.LOOKUP:
