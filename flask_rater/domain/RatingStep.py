@@ -129,33 +129,44 @@ class LinearInterpolate(AbstractRatingStep):
                  rating_factor_repository: AbstractRatingFactorRepository,
                  conditions: AbstractRatingStepCondition = None):
         self.target = target
-        self.inputs = parameters
+        self.params = parameters
         self.rating_factor_repository = rating_factor_repository
         self.conditions = conditions
         super().__init__()
 
     def apply(self, rating_variables: dict):
-        rating_factor_type = self.inputs.pop(0)
+        rating_factor_type = self.params.pop(0)
         rating_factor_type = rating_factor_type.evaluate(rating_variables)
 
         options = None
-        if self.inputs[0].label == 'options':
-            options = self.parse_options(self.inputs.pop(0).value)
+        if self.params[0].label == 'options':
+            options = self.parse_options(self.params.pop(0).value)
 
-        interpolate_column = options['interpolate']
+        interpolate_variable = options['interpolate']
+        interpolate_column = None
 
-        evaluated_inputs = {}
+        evaluated_params = {}
         x = None
-        for rating_step_parameter in self.inputs:
-            evaluated_inputs[rating_step_parameter.label] = rating_step_parameter.evaluate(rating_variables)
-            if rating_step_parameter.label == interpolate_column:
-                x = evaluated_inputs[rating_step_parameter.label]
+        for rating_step_parameter in self.params:
+            param = rating_step_parameter.evaluate(rating_variables)
+            evaluated_params[rating_step_parameter.label] = param
+            if rating_step_parameter.value == interpolate_variable:
+                x = param
+                interpolate_column = rating_step_parameter.label
 
         if x is None:
-            raise ValueError("Missing input for interpolation") # TODO check this
+            raise Exception("Missing input for interpolation")
 
-        lower = self.rating_factor_repository.get_factor(rating_factor_type, evaluated_inputs.copy(), {"step_down": interpolate_column})
-        upper = self.rating_factor_repository.get_factor(rating_factor_type, evaluated_inputs.copy(), {"step_up": interpolate_column})
+        lower = self.rating_factor_repository.get_factor(
+            rating_factor_type,
+            evaluated_params.copy(),
+            {"step_down": interpolate_column}
+        )
+        upper = self.rating_factor_repository.get_factor(
+            rating_factor_type,
+            evaluated_params.copy(),
+            {"step_up": interpolate_column}
+        )
 
         x = float(x)
         x0 = float(getattr(lower, interpolate_column))

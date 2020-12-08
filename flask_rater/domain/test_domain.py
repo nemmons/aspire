@@ -482,7 +482,7 @@ def test_linear_interpolate_step():
                 ],
                 MockFactorRepo()
             )
-            with self.assertRaises(ValueError):
+            with self.assertRaises(Exception):
                 step.run({'x': 5})
     test = MissingInterpolateValue()
     test.test()
