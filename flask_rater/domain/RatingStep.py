@@ -171,11 +171,15 @@ class LinearInterpolate(AbstractRatingStep):
             evaluated_params.copy(),
             {"step_down": interpolate_column}
         )
+        if lower is None:
+            raise Exception("Interpolation Lookup failed to find lower value!")
         upper = self.rating_factor_repository.get_factor(
             rating_factor_type,
             evaluated_params.copy(),
             {"step_up": interpolate_column}
         )
+        if upper is None:
+            raise Exception("Interpolation Lookup failed to find upper value!")
 
         x = float(x)
         x0 = float(getattr(lower, interpolate_column))
