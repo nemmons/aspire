@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
-from flask_rater.database import Base
 from typing import List
+from .engine import Base
 
 
 class RatingManual(Base):

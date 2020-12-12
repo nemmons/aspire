@@ -1,9 +1,9 @@
 import argparse
 import csv
 
-from flask_rater import create_app
-from flask_rater.domain.Rater import Rater
-from flask_rater.repo import RatingManualRepository
+from web import create_app
+from domain.Rater import Rater
+from repo import RatingManualRepository
 
 parser = argparse.ArgumentParser(description="Provided a rating_manual_id and csv file location, runs a rater and "
                                              "saves results")

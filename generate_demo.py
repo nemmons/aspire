@@ -1,7 +1,7 @@
-from flask_rater import create_app
-from models import RatingManual, RatingStep, RatingStepParameter, RatingFactor
-from flask_rater.domain.RatingStep import RatingStepType as RatingStepTypeEnum
-from flask_rater.domain.RatingStepParameter import RatingStepParameterType as RatingStepParameterTypeEnum
+from web import create_app
+from database.models import RatingManual, RatingStep, RatingStepParameter, RatingFactor
+from domain.RatingStep import RatingStepType as RatingStepTypeEnum
+from domain.RatingStepParameter import RatingStepParameterType as RatingStepParameterTypeEnum
 
 app = create_app()
 

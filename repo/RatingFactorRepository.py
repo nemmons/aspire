@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import session
-from models import RatingFactor as RatingFactorModel
+from database.models import RatingFactor as RatingFactorModel
 
 
 class AbstractRatingFactorRepository(ABC):

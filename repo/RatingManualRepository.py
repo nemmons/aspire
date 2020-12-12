@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
-from models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
+from database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel
-from flask_rater.domain import RatingManual, RatingStep
+from domain import RatingManual, RatingStep
 from sqlalchemy.orm import session, joinedload
-from flask_rater.repo.RatingFactorRepository import RatingFactorRepository
+from repo.RatingFactorRepository import RatingFactorRepository
 from typing import List
 import json
-from ..domain.RatingStepCondition import LogicalOperation, ComparisonOperation
-from ..domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
+from domain.RatingStepCondition import LogicalOperation, ComparisonOperation
+from domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
 
 
 class AbstractRatingManualRepository(ABC):

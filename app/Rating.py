@@ -1,4 +1,4 @@
-from flask_rater.domain.Rater import Rater
+from domain.Rater import Rater
 
 
 def rate(rating_manual_id, rating_manual_repository, rating_inputs):

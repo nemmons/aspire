@@ -2,20 +2,20 @@ import os
 
 from flask import Flask, render_template, _app_ctx_stack
 from sqlalchemy.orm import scoped_session
-from .database import SessionLocal, engine
+from database.engine import SessionLocal, SQLALCHEMY_DATABASE_URL
+from database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from .app import Rating
-from .repo import RatingManualRepository
-from models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
+from app import Rating
+from repo import RatingManualRepository
 
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True, instance_path=os.path.abspath(os.path.dirname(__file__)))
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'db.sqlite'),
+        DATABASE=SQLALCHEMY_DATABASE_URL,
     )
     app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
 

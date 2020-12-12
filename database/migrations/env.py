@@ -21,9 +21,11 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from flask_rater import database
-import models
-target_metadata = database.Base.metadata
+import database.models
+from database.engine import Base
+
+target_metadata = Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

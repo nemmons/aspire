@@ -8,10 +8,10 @@ from .RatingStepParameter import \
     RatingStepParameter, \
     RatingStepParameterType
 
-from flask_rater.repo.RatingFactorRepository import AbstractRatingFactorRepository
-from flask_rater.repo.RatingManualRepository import AbstractRatingManualRepository
+from repo.RatingFactorRepository import AbstractRatingFactorRepository
+from repo.RatingManualRepository import AbstractRatingManualRepository
 
-from flask_rater.domain import Rater
+from domain import Rater
 
 from .RatingStepCondition import ComparisonOperation, LogicalOperation
 
