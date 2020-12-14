@@ -6,13 +6,42 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///" + os.path.abspath(os.path.dirname(__file__)) + "/test.db"
-print(SQLALCHEMY_DATABASE_URL)
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    echo=False
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def get_session_factory(engine=None):
+    if engine is None:
+        engine = create_engine(
+            SQLALCHEMY_DATABASE_URL,
+            connect_args={"check_same_thread": False},
+            echo=False
+        )
+    factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return factory
+
 
 Base = declarative_base()
+
+
+def setup_test_db_session(url='sqlite:///:memory:'):
+    from sqlalchemy import engine_from_config
+    from alembic import command
+    from alembic.config import Config
+    import os
+
+    import warnings
+    from sqlalchemy.exc import SAWarning
+    warnings.filterwarnings('ignore', r".*support Decimal objects natively", SAWarning,
+                            r'^sqlalchemy\.sql\.sqltypes$')
+
+    settings = {'sqlalchemy.url': url}
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    factory = get_session_factory(engine)
+
+    with engine.begin() as connection:
+        alembic_cfg = Config(os.path.abspath(os.path.dirname(__file__)) + '/alembic.ini')
+        alembic_cfg.attributes['connection'] = connection
+        alembic_cfg.set_main_option('script_location', os.path.abspath(os.path.dirname(__file__)) + '/migrations')
+        command.upgrade(alembic_cfg, 'head')
+
+    session = factory()
+    return session
