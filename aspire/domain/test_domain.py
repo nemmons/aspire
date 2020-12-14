@@ -219,15 +219,13 @@ def test_set_rating_step_from_variable():
 class MockRatingFactorRepository(AbstractRatingFactorRepository):
     def __init__(self):
         super().__init__()
-        pass
 
     def lookup(self, rating_factor_type: str, params: dict, options: dict = None):
         if rating_factor_type == 'multiply_test':
             return params['base_rate_1'] * params['base_rate_2']
-        elif rating_factor_type == 'add_test':
+        if rating_factor_type == 'add_test':
             return params['base_rate_1'] + params['base_rate_2']
-        elif rating_factor_type == 'base_rate':
-            return params['coverage'] * 5
+        return params['coverage'] * 5
 
     def get_factor(self, rating_factor_type: str, params: dict, options=None):
         pass
@@ -438,13 +436,11 @@ def test_lookup_step_options():
     class MockFactorRepo(AbstractRatingFactorRepository):
         def __init__(self):
             super().__init__()
-            pass
 
         def lookup(self, rating_factor_type: str, params: dict, options: dict = None):
             if 'x' in options and options['x'] == 'yes':
                 return '1'
-            else:
-                return '0'
+            return '0'
 
         def get_factor(self, rating_factor_type: str, params: dict, options=None):
             pass
@@ -471,7 +467,6 @@ def test_linear_interpolate_step():
     class MockFactorRepo(AbstractRatingFactorRepository):
         def __init__(self):
             super().__init__()
-            pass
 
         def lookup(self, rating_factor_type: str, params: dict, options: dict = None):
             pass
@@ -479,10 +474,9 @@ def test_linear_interpolate_step():
         def get_factor(self, rating_factor_type: str, params: dict, options=None):
             if 'step_down' in options:
                 return FakeRatingFactor(5, 25)
-            elif 'step_up' in options:
+            if 'step_up' in options:
                 return FakeRatingFactor(10, 40)
-            else:
-                raise Exception("Bad Test Input")
+            raise Exception("Bad Test Input")
 
     linear_interpolate_step = LinearInterpolate(
         'result',

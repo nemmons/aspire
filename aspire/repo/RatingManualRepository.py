@@ -92,18 +92,18 @@ class RatingManualRepository(AbstractRatingManualRepository):
         return self.parse_structured_conditions(structured_conditions)
 
     def parse_structured_conditions(self, structured_conditions):
-        if type(structured_conditions) is dict:
+        if isinstance(structured_conditions, dict):
             operator = list(structured_conditions.keys())[0]
 
             if operator in ['<', '<=', '>', '>=', '==', '!=', 'BETWEEN']:
                 operands = self.parse_comparison_operator_params(structured_conditions[operator])
                 return ComparisonOperation(operator, operands)
 
-            elif operator in ['AND', 'OR', 'NOT']:
+            if operator in ['AND', 'OR', 'NOT']:
                 operands = self.parse_structured_conditions(structured_conditions[operator])
                 return LogicalOperation(operator, operands)
 
-        elif type(structured_conditions) is list:
+        elif isinstance(structured_conditions, list):
             new_list = []
             for condition in structured_conditions:
                 new_list.append(self.parse_structured_conditions(condition))

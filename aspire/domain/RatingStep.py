@@ -49,7 +49,7 @@ class BaseArithmeticRatingStep(AbstractRatingStep):
 
     def apply(self, rating_variables: dict):
         operands = self.evaluate_operands(rating_variables)
-        result = reduce(lambda x, y: self.operation(x, y), operands)
+        result = reduce(self.operation, operands)
 
         rating_variables[self.target] = str(result)
         return rating_variables
@@ -204,4 +204,3 @@ class LinearInterpolate(AbstractRatingStep):
             spl = option_set.split(':')
             options[spl[0]] = spl[1]
         return options
-

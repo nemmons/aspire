@@ -24,17 +24,17 @@ class ComparisonOperation(AbstractRatingStepCondition):
 
         if self.operator == '<':
             return float(operands[0]) < float(operands[1])
-        elif self.operator == '<=':
+        if self.operator == '<=':
             return float(operands[0]) <= float(operands[1])
-        elif self.operator == '>':
+        if self.operator == '>':
             return float(operands[0]) > float(operands[1])
-        elif self.operator == '>=':
+        if self.operator == '>=':
             return float(operands[0]) >= float(operands[1])
-        elif self.operator == '==':
+        if self.operator == '==':
             return operands[0] == operands[1]
-        elif self.operator == '!=':
+        if self.operator == '!=':
             return operands[0] != operands[1]
-        elif self.operator == 'BETWEEN':
+        if self.operator == 'BETWEEN':
             return float(operands[1]) <= float(operands[0]) <= float(operands[2])
 
         return False
@@ -58,11 +58,10 @@ class LogicalOperation(AbstractRatingStepCondition):
 
         if self.operator == 'AND':
             return reduce(lambda result1, result2: result1 and result2, results)
-        elif self.operator == 'OR':
+        if self.operator == 'OR':
             return reduce(lambda result1, result2: result1 or result2, results)
-        elif self.operator == 'NOT':
+        if self.operator == 'NOT':
             return not results[0]
-
         return False
 
     def __str__(self):
@@ -74,4 +73,3 @@ class LogicalOperation(AbstractRatingStepCondition):
 
         padded = ' ' + self.operator + ' '
         return '(' + padded.join(str(o) for o in self.operands) + ')'
-

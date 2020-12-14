@@ -26,7 +26,6 @@ def setup_test_db_session(url='sqlite:///:memory:'):
     from sqlalchemy import engine_from_config
     from alembic import command
     from alembic.config import Config
-    import os
 
     import warnings
     from sqlalchemy.exc import SAWarning

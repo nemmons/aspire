@@ -15,7 +15,7 @@ class RatingStepParameter:
     def evaluate(self, rating_variables: dict):
         if self.parameter_type == RatingStepParameterType.VARIABLE:
             return rating_variables[self.value]
-        elif self.parameter_type == RatingStepParameterType.LITERAL:
+        if self.parameter_type == RatingStepParameterType.LITERAL:
             return self.value
 
     def __str__(self):
