@@ -1,13 +1,15 @@
+import json
 from abc import ABC, abstractmethod
+from typing import List
+
+from sqlalchemy.orm import joinedload
+
 from database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel
 from domain import RatingManual, RatingStep
-from sqlalchemy.orm import session, joinedload
-from repo.RatingFactorRepository import RatingFactorRepository
-from typing import List
-import json
 from domain.RatingStepCondition import LogicalOperation, ComparisonOperation
 from domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
+from repo.RatingFactorRepository import RatingFactorRepository
 
 
 class AbstractRatingManualRepository(ABC):
