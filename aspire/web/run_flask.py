@@ -1,6 +1,7 @@
 import sys
+import os
 
-sys.path = ['.'] + sys.path[1:]
+sys.path.insert(0, os.path.abspath('..'))
 
 # Run a test server.
 from web import create_app

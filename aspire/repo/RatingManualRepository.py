@@ -4,12 +4,12 @@ from typing import List
 
 from sqlalchemy.orm import joinedload
 
-from database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
+from aspire.database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel
-from domain import RatingManual, RatingStep
-from domain.RatingStepCondition import LogicalOperation, ComparisonOperation
-from domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
-from repo.RatingFactorRepository import RatingFactorRepository
+from aspire.domain import RatingManual, RatingStep
+from aspire.domain.RatingStepCondition import LogicalOperation, ComparisonOperation
+from aspire.domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
+from aspire.repo.RatingFactorRepository import RatingFactorRepository
 
 
 class AbstractRatingManualRepository(ABC):

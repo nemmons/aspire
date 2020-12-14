@@ -1,9 +1,15 @@
+# Path hack.
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath('..'))
+
 import argparse
 import csv
 
 from web import create_app
-from domain.Rater import Rater
-from repo import RatingManualRepository
+from aspire.domain.Rater import Rater
+from aspire.repo import RatingManualRepository
 
 parser = argparse.ArgumentParser(description="Provided a rating_manual_id and csv file location, runs a rater and "
                                              "saves results")

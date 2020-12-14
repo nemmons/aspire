@@ -8,10 +8,10 @@ from .RatingStepParameter import \
     RatingStepParameter, \
     RatingStepParameterType
 
-from repo.RatingFactorRepository import AbstractRatingFactorRepository
-from repo.RatingManualRepository import AbstractRatingManualRepository
+from aspire.repo.RatingFactorRepository import AbstractRatingFactorRepository
+from aspire.repo.RatingManualRepository import AbstractRatingManualRepository
 
-from domain import Rater
+from aspire.domain import Rater
 
 from .RatingStepCondition import ComparisonOperation, LogicalOperation
 

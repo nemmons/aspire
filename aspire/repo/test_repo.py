@@ -1,8 +1,8 @@
 import json
 from .RatingManualRepository import RatingManualRepository
-from database.models import RatingFactor as RatingFactorModel
-from repo.RatingFactorRepository import RatingFactorRepository
-from database.engine import setup_test_db_session
+from aspire.database.models import RatingFactor as RatingFactorModel
+from aspire.repo.RatingFactorRepository import RatingFactorRepository
+from aspire.database.engine import setup_test_db_session
 
 
 def test_parsing_rating_step_conditions():

@@ -2,12 +2,10 @@ import os
 
 from flask import Flask, render_template, _app_ctx_stack
 from sqlalchemy.orm import scoped_session
-from database.engine import SessionLocal, SQLALCHEMY_DATABASE_URL
-from database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
+from ..database.engine import get_session_factory, SQLALCHEMY_DATABASE_URL
+from ..database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from app import Rating
-from repo import RatingManualRepository
 
 
 def create_app(test_config=None):

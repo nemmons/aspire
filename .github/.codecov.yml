@@ -1,2 +1,3 @@
 ignore:
-  - "generate_demo.py"
+  - "aspire/generate_demo.py"
+  - "aspire/database/migrations"

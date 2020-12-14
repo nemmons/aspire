@@ -1,4 +1,4 @@
-from domain.Rater import Rater
+from aspire.domain.Rater import Rater
 
 
 def rate(rating_manual_id, rating_manual_repository, rating_inputs):
