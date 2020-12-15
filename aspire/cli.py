@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath('..'))
 import argparse
 import csv
 
-from web import create_app
+from aspire.web import create_app
 from aspire.domain.Rater import Rater
 from aspire.repo import RatingManualRepository
 

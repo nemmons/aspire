@@ -4,7 +4,7 @@ import os
 
 sys.path.insert(0, os.path.abspath('..'))
 
-from web import create_app
+from aspire.web import create_app
 from aspire.database.models import RatingManual, RatingStep, RatingStepParameter, RatingFactor
 from aspire.domain.RatingStep import RatingStepType as RatingStepTypeEnum
 from aspire.domain.RatingStepParameter import RatingStepParameterType as RatingStepParameterTypeEnum
