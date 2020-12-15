@@ -21,6 +21,7 @@ class RatingStepType(IntEnum):
 
 class AbstractRatingStep(ABC):
     conditions: AbstractRatingStepCondition
+    target: str
 
     def __init__(self):
         pass
