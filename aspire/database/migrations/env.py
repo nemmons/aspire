@@ -1,36 +1,23 @@
 from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
 
 # https://stackoverflow.com/questions/57468141/alembic-modulenotfounderror-in-env-py
-import sys
-sys.path = ['', '..'] + sys.path[1:]
+import os, sys
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if BASE_DIR not in sys.path:
+    sys.path.append(BASE_DIR)
+
+# ignore IDE warnings here (or add '..' to the PYTHONPATH in IDE settings
+import database.models
+from database.engine import Base
+
 config = context.config
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-import aspire.database.models
-from aspire.database.engine import Base
-
 target_metadata = Base.metadata
-
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline():
