@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template, _app_ctx_stack
 from sqlalchemy.orm import scoped_session
-from ..database.engine import get_session_factory, SQLALCHEMY_DATABASE_URL
+from ..database.engine import ConnectionManager
 from ..database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -12,11 +12,10 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True,
                 instance_path=os.path.abspath(os.path.dirname(__file__)) + '/instance')
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=SQLALCHEMY_DATABASE_URL,
-    )
-    app.session = scoped_session(get_session_factory(), scopefunc=_app_ctx_stack.__ident_func__)
+
+    connection_manager = ConnectionManager()
+    session_factory = connection_manager.get_session_factory()
+    app.session = scoped_session(session_factory, scopefunc=_app_ctx_stack.__ident_func__)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

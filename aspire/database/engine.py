@@ -3,27 +3,40 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from yaml import safe_load
 import os
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///" + os.path.abspath(os.path.dirname(__file__)) + "/test.db"
-
-
-def get_session_factory(engine=None):
-    if engine is None:
-        engine = create_engine(
-            SQLALCHEMY_DATABASE_URL,
-            connect_args={"check_same_thread": False},
-            echo=False
-        )
-    factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    return factory
-
 
 Base = declarative_base()
 
 
+class ConnectionManager(object):
+    def __init__(self, config=None):
+        config_filename = os.path.abspath(os.path.dirname(__file__)) + '/config.yml'
+        if config is not None:
+            self.config = config
+        elif os.path.exists(config_filename):
+            with open(config_filename) as f:
+                self.config = safe_load(f)
+
+        if 'SQLALCHEMY_DATABASE_URI' not in self.config:
+            raise Exception("Missing required configuration key ''SQLALCHEMY_DATABASE_URI'")
+
+        self.engine = create_engine(
+            self.config['SQLALCHEMY_DATABASE_URI'],
+            connect_args={"check_same_thread": False},
+            echo=False
+        )
+
+    def get_session_factory(self):
+        factory = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        return factory
+
+    def get_session(self):
+        factory = self.get_session_factory()
+        return factory()
+
+
 def setup_test_db_session(url='sqlite:///:memory:'):
-    from sqlalchemy import engine_from_config
     from alembic import command
     from alembic.config import Config
 
@@ -32,9 +45,9 @@ def setup_test_db_session(url='sqlite:///:memory:'):
     warnings.filterwarnings('ignore', r".*support Decimal objects natively", SAWarning,
                             r'^sqlalchemy\.sql\.sqltypes$')
 
-    settings = {'sqlalchemy.url': url}
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    factory = get_session_factory(engine)
+    manager = ConnectionManager({'SQLALCHEMY_DATABASE_URI': url})
+    session = manager.get_session()
+    engine = manager.engine
 
     with engine.begin() as connection:
         alembic_cfg = Config(os.path.abspath(os.path.dirname(__file__)) + '/alembic.ini')
@@ -42,5 +55,4 @@ def setup_test_db_session(url='sqlite:///:memory:'):
         alembic_cfg.set_main_option('script_location', os.path.abspath(os.path.dirname(__file__)) + '/migrations')
         command.upgrade(alembic_cfg, 'head')
 
-    session = factory()
     return session
