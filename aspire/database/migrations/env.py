@@ -12,10 +12,17 @@ if BASE_DIR not in sys.path:
 
 # ignore IDE warnings here (or add '..' to the PYTHONPATH in IDE settings
 import database.models
-from database.engine import Base
+from database.engine import Base, ConnectionManager
 
 config = context.config
 fileConfig(config.config_file_name)
+
+# get connection string from
+custom_config = ConnectionManager.read_config_file()
+if 'SQLALCHEMY_DATABASE_URI' in custom_config:
+    uri = custom_config['SQLALCHEMY_DATABASE_URI']
+    escaped_uri = uri.replace('%', '%%')  # necessary for mssql+pyodbc strings providing 'odbc_connect' value
+    config.set_main_option('sqlalchemy.url', escaped_uri)
 
 target_metadata = Base.metadata
 

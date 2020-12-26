@@ -1,0 +1,11 @@
+# Instructions: copy this file to 'config.yml' and set the appropriate connection string for connecting
+# to your database of choice
+
+# SQLITE:
+#SQLALCHEMY_DATABASE_URI: "sqlite:////absolute/path/to/database.db"
+
+# SQLITE In-Memory
+# SQLALCHEMY_DATABASE_URI: "sqlite:///:memory:"
+
+# Azure Cloud DB
+#SQLALCHEMY_DATABASE_URI: "mssql+pyodbc:///?autocommit=true&odbc_connect=Driver%3D%7BODBC+Driver+17+for+SQL+Server%7D%3BServer%3Dtcp%3A{server_name}.database.windows.net%2C1433%3BDatabase%3D{database_name}%3B%0AUid%3D{user_name}%3BPwd%3D{password}%3BEncrypt%3Dyes%3BTrustServerCertificate%3Dno%3BConnection+Timeout%3D30%3B"

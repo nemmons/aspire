@@ -10,13 +10,20 @@ Base = declarative_base()
 
 
 class ConnectionManager(object):
-    def __init__(self, config=None):
+    @classmethod
+    def read_config_file(cls):
         config_filename = os.path.abspath(os.path.dirname(__file__)) + '/config.yml'
+        if os.path.exists(config_filename):
+            with open(config_filename) as f:
+                return safe_load(f)
+        return {}
+
+    def __init__(self, config=None):
+
         if config is not None:
             self.config = config
-        elif os.path.exists(config_filename):
-            with open(config_filename) as f:
-                self.config = safe_load(f)
+        else:
+            self.config = self.read_config_file()
 
         if 'SQLALCHEMY_DATABASE_URI' not in self.config:
             raise Exception("Missing required configuration key ''SQLALCHEMY_DATABASE_URI'")

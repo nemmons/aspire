@@ -32,13 +32,14 @@ if not rows or len(rows) == 0:
     raise Exception("No Data To Process!")
 
 keys = {}
-for count, row in enumerate(rows):
-    print("Processing Row #" + str(count))
+for i, row in enumerate(rows):
+    print("Processing Row #" + str(i))
     manual = repository.get(1)
     rater = Rater(manual)
     rate = rater.rate(row.copy())
     row['rate'] = rate
-    if count == 1:
+    print("Rate:" + rate)
+    if i == 1:
         keys = row.keys()
 
 with open(file_path, 'w', newline='') as csv_file:
