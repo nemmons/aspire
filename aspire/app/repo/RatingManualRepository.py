@@ -4,12 +4,12 @@ from typing import List
 
 from sqlalchemy.orm import joinedload
 
-from aspire.database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
+from aspire.app.database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel
-from aspire.domain import RatingManual, RatingStep
-from aspire.domain.RatingStepCondition import LogicalOperation, ComparisonOperation
-from aspire.domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
-from aspire.repo.RatingFactorRepository import RatingFactorRepository
+from aspire.app.domain import RatingManual, RatingStep
+from aspire.app.domain.RatingStepCondition import LogicalOperation, ComparisonOperation
+from aspire.app.domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
+from aspire.app.repo import RatingFactorRepository
 
 
 class AbstractRatingManualRepository(ABC):
@@ -67,9 +67,14 @@ class RatingManualRepository(AbstractRatingManualRepository):
         elif rating_step_type == RatingStep.RatingStepType.ROUND:
             step = RatingStep.Round(data.target, params, conditions)
         elif rating_step_type == RatingStep.RatingStepType.LOOKUP:
-            step = RatingStep.Lookup(data.target, params, RatingFactorRepository(rating_manual_id, self.db_session), conditions)
+            step = RatingStep.Lookup(data.target, params,
+                                     RatingFactorRepository.RatingFactorRepository(rating_manual_id, self.db_session),
+                                     conditions)
         elif rating_step_type == RatingStep.RatingStepType.LINEAR_INTERPOLATE:
-            step = RatingStep.LinearInterpolate(data.target, params, RatingFactorRepository(rating_manual_id, self.db_session), conditions)
+            step = RatingStep.LinearInterpolate(data.target, params,
+                                                RatingFactorRepository.RatingFactorRepository(rating_manual_id,
+                                                                                              self.db_session),
+                                                conditions)
         else:
             step = None
 

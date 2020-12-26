@@ -8,8 +8,8 @@ import argparse
 import csv
 
 from aspire.web import create_app
-from aspire.domain.Rater import Rater
-from aspire.repo import RatingManualRepository
+from aspire.app.domain.Rater import Rater
+from aspire.app.repo import RatingManualRepository
 
 parser = argparse.ArgumentParser(description="Provided a rating_manual_id and csv file location, runs a rater and "
                                              "saves results")

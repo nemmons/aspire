@@ -17,4 +17,4 @@ build/
 .idea/
 
 *.db
-aspire/database/config.yml
+aspire/app/database/config.yml
