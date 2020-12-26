@@ -32,30 +32,30 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('rating_steps',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('rating_manual_id', sa.Integer(), nullable=True),
-    sa.Column('rating_step_type_id', sa.Integer(), nullable=True),
-    sa.Column('name', sa.String(length=25), nullable=True),
-    sa.Column('description', sa.String(length=50), nullable=True),
-    sa.Column('step_order', sa.Integer(), nullable=True),
-    sa.Column('target', sa.String(length=20), nullable=True),
-    sa.Column('created', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['rating_manual_id'], ['rating_manuals.id'], ),
-    sa.ForeignKeyConstraint(['rating_step_type_id'], ['rating_step_types.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
+                    sa.Column('id', sa.Integer(), nullable=False),
+                    sa.Column('rating_manual_id', sa.Integer(), nullable=True),
+                    sa.Column('rating_step_type_id', sa.Integer(), nullable=True),
+                    sa.Column('name', sa.String(length=50), nullable=True),
+                    sa.Column('description', sa.String(length=255), nullable=True),
+                    sa.Column('step_order', sa.Integer(), nullable=True),
+                    sa.Column('target', sa.String(length=50), nullable=True),
+                    sa.Column('created', sa.DateTime(), nullable=True),
+                    sa.ForeignKeyConstraint(['rating_manual_id'], ['rating_manuals.id'], ),
+                    # sa.ForeignKeyConstraint(['rating_step_type_id'], ['rating_step_types.id'], ),
+                    sa.PrimaryKeyConstraint('id')
+                    )
     op.create_table('rating_step_parameters',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('rating_manual_id', sa.Integer(), nullable=True),
-    sa.Column('rating_step_id', sa.Integer(), nullable=True),
-    sa.Column('parameter_order', sa.Integer(), nullable=True),
-    sa.Column('label', sa.String(length=20), nullable=True),
-    sa.Column('value', sa.String(length=20), nullable=True),
-    sa.Column('created', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['rating_manual_id'], ['rating_manuals.id'], ),
-    sa.ForeignKeyConstraint(['rating_step_id'], ['rating_steps.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
+                    sa.Column('id', sa.Integer(), nullable=False),
+                    sa.Column('rating_manual_id', sa.Integer(), nullable=True),
+                    sa.Column('rating_step_id', sa.Integer(), nullable=True),
+                    sa.Column('parameter_order', sa.Integer(), nullable=True),
+                    sa.Column('label', sa.String(length=50), nullable=True),
+                    sa.Column('value', sa.String(length=50), nullable=True),
+                    sa.Column('created', sa.DateTime(), nullable=True),
+                    sa.ForeignKeyConstraint(['rating_manual_id'], ['rating_manuals.id'], ),
+                    sa.ForeignKeyConstraint(['rating_step_id'], ['rating_steps.id'], ),
+                    sa.PrimaryKeyConstraint('id')
+                    )
     # ### end Alembic commands ###
 
 

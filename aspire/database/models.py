@@ -25,16 +25,17 @@ class RatingStep(Base):
     id = Column(Integer, primary_key=True)
     rating_manual_id = Column(Integer, ForeignKey('rating_manuals.id'))
     rating_step_type_id = Column(Integer, ForeignKey('rating_step_types.id'))  # type: int
-    name = Column(String(25))
-    description = Column(String(50))
+    name = Column(String(50))
+    description = Column(String(255))
     step_order = Column(Integer)
-    target = Column(String(20))
+    target = Column(String(50))
     conditions = Column(String(512))
     created = Column(DateTime)
 
     rating_manual = relationship("RatingManual", back_populates="rating_steps")
     rating_step_type = relationship("RatingStepType")
-    rating_step_parameters = relationship("RatingStepParameter", back_populates="rating_step")  # type: List[RatingStepParameter]
+    rating_step_parameters = relationship("RatingStepParameter",
+                                          back_populates="rating_step")  # type: List[RatingStepParameter]
 
     def __str__(self):
         return str(self.id) + ": " + self.name
@@ -47,8 +48,8 @@ class RatingStepParameter(Base):
     rating_manual_id = Column(Integer, ForeignKey('rating_manuals.id'))
     rating_step_id = Column(Integer, ForeignKey('rating_steps.id'))
     parameter_order = Column(Integer)
-    label = Column(String(20))
-    value = Column(String(20))
+    label = Column(String(50))
+    value = Column(String(50))
     parameter_type = Column(Integer)  # type: int
     created = Column(DateTime)
 
@@ -74,7 +75,7 @@ class RatingFactor(Base):
 
     id = Column(Integer, primary_key=True)
     rating_manual_id = Column(Integer, ForeignKey('rating_manuals.id'))
-    type = Column(String(20))
+    type = Column(String(50))
     num_col_1 = Column(Numeric(12, 4))
     num_col_2 = Column(Numeric(12, 4))
     num_col_3 = Column(Numeric(12, 4))
