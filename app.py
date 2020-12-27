@@ -14,6 +14,20 @@ def run_webapp():
 
 
 @cli.command()
+@click.option('--rebuild', type=bool, default=False)
+def build_database(rebuild: bool):
+    """Run alembic database migrations to (re)build the database"""
+    from aspire.app.database.engine import run_migrations
+
+    if rebuild:
+        print("rolling back...")
+        run_migrations('downgrade', 'base')
+
+    print("migrating forward...")
+    run_migrations('upgrade', 'head')
+
+
+@cli.command()
 def seed_demo_data():
     """Seed demo data into the database"""
     from aspire.app.Demo import seed_demo_data
@@ -31,6 +45,7 @@ def rate_from_csv(rating_manual_id, file_path):
 
 
 cli.add_command(run_webapp)
+cli.add_command(build_database)
 cli.add_command(seed_demo_data)
 cli.add_command(rate_from_csv)
 

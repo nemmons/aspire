@@ -64,3 +64,26 @@ def setup_test_db_session(sqlalchemy_uri='sqlite:///:memory:'):
         command.upgrade(alembic_cfg, 'head')
 
     return session
+
+
+def run_migrations(command_name='upgrade', target='head'):
+    from alembic import command
+    from alembic.config import Config
+
+    import warnings
+    from sqlalchemy.exc import SAWarning
+    warnings.filterwarnings('ignore', r".*support Decimal objects natively", SAWarning,
+                            r'^sqlalchemy\.sql\.sqltypes$')
+
+    manager = ConnectionManager()
+    engine = manager.engine
+
+    with engine.begin() as connection:
+        alembic_cfg = Config(os.path.abspath(os.path.dirname(__file__)) + '/alembic.ini')
+        alembic_cfg.attributes['connection'] = connection
+        alembic_cfg.set_main_option('script_location', os.path.abspath(os.path.dirname(__file__)) + '/migrations')
+        alembic_cfg.set_main_option('sqlalchemy.url', manager.config['SQLALCHEMY_DATABASE_URI'])
+        # command.upgrade(alembic_cfg, target)
+
+        fn = getattr(command, command_name)
+        fn(alembic_cfg, target)
