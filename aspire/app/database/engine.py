@@ -43,7 +43,7 @@ class ConnectionManager(object):
         return factory()
 
 
-def setup_test_db_session(url='sqlite:///:memory:'):
+def setup_test_db_session(sqlalchemy_uri='sqlite:///:memory:'):
     from alembic import command
     from alembic.config import Config
 
@@ -52,7 +52,7 @@ def setup_test_db_session(url='sqlite:///:memory:'):
     warnings.filterwarnings('ignore', r".*support Decimal objects natively", SAWarning,
                             r'^sqlalchemy\.sql\.sqltypes$')
 
-    manager = ConnectionManager({'SQLALCHEMY_DATABASE_URI': url})
+    manager = ConnectionManager({'SQLALCHEMY_DATABASE_URI': sqlalchemy_uri})
     session = manager.get_session()
     engine = manager.engine
 
@@ -60,6 +60,7 @@ def setup_test_db_session(url='sqlite:///:memory:'):
         alembic_cfg = Config(os.path.abspath(os.path.dirname(__file__)) + '/alembic.ini')
         alembic_cfg.attributes['connection'] = connection
         alembic_cfg.set_main_option('script_location', os.path.abspath(os.path.dirname(__file__)) + '/migrations')
+        alembic_cfg.set_main_option('sqlalchemy.url', sqlalchemy_uri)
         command.upgrade(alembic_cfg, 'head')
 
     return session
