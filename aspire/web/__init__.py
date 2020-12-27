@@ -2,14 +2,13 @@ import os
 
 from flask import Flask, render_template, _app_ctx_stack
 from sqlalchemy.orm import scoped_session
-from aspire.app.database import ConnectionManager
-from aspire.app.database import RatingStep, RatingStepType, RatingStepParameter, RatingManual
+from aspire.app.database.engine import ConnectionManager
+from aspire.app.database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
 
-def create_app(test_config=None):
-    # create and configure the app
+def create_webapp(test_config=None):
     app = Flask(__name__, instance_relative_config=True,
                 instance_path=os.path.abspath(os.path.dirname(__file__)) + '/instance')
 

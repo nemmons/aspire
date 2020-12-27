@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import IntEnum
 from typing import List
-from aspire.app.repo.RatingFactorRepository import AbstractRatingFactorRepository
+from ..repo.RatingFactorRepository import AbstractRatingFactorRepository
 from .RatingStepParameter import RatingStepParameter
 from functools import reduce
 from .RatingStepCondition import AbstractRatingStepCondition
