@@ -568,3 +568,78 @@ def seed_demo_data():
 
     session.add(rating_manual)
     session.commit()
+
+
+def generate_demo_rating_input_csv(file_path="fnord.csv"):
+    import os
+    from csv import DictWriter
+
+    if os.path.isfile(file_path):
+        raise Exception("Output file already exists!")
+
+    headers = {
+        "amount_of_insurance": None,
+        "territory": None,
+        "protection_class": None,
+        "construction_type": None,
+        "underwriting_tier": None,
+        "deductible": None,
+        "new_home": None,
+        "five_years_claims_free": None,
+        "multi_policy": None,
+        "jewelry_coverage": None,
+        "liability_medical_coverage": None,
+        "rate": None
+    }
+
+    data = [
+        {
+            "amount_of_insurance": 215000,
+            "territory": 4,
+            "protection_class": 7,
+            "construction_type": "Frame",
+            "underwriting_tier": "C",
+            "deductible": 1000,
+            "new_home": "yes",
+            "five_years_claims_free": "yes",
+            "multi_policy": "no",
+            "jewelry_coverage": 10000,
+            "liability_medical_coverage": "100000/500",
+            "rate": None,
+        },
+        {
+            "amount_of_insurance": 215000,
+            "territory": 4,
+            "protection_class": 7,
+            "construction_type": "Frame",
+            "underwriting_tier": "C",
+            "deductible": 1000,
+            "new_home": "yes",
+            "five_years_claims_free": "yes",
+            "multi_policy": "no",
+            "jewelry_coverage": 2500,
+            "liability_medical_coverage": "100000/500",
+            "rate": None,
+        },
+        {
+            "amount_of_insurance": 525000,
+            "territory": 4,
+            "protection_class": 1,
+            "construction_type": "Masonry",
+            "underwriting_tier": "A",
+            "deductible": "1000",
+            "new_home": "yes",
+            "five_years_claims_free": "yes",
+            "multi_policy": "no",
+            "jewelry_coverage": "10000",
+            "liability_medical_coverage": "300000/1000",
+            "rate": None,
+        },
+    ]
+
+    with open(file_path, 'w') as csv_file:
+        writer = DictWriter(csv_file, delimiter=',', fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(data)
+
+    return file_path

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Rating</title>
+</head>
+<body>
+<h1>CSV Rating</h1>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class=flashes>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+<form method="POST" action="/rating/csv" enctype="multipart/form-data">
+    <select name="rating_manual_id">
+        {% for manual in manuals %}
+            <option value="{{ manual.id }}">#{{ manual.id }}: {{ manual.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="file" name="file">
+    <input type="submit" value="Rate">
+</form>
+</body>
+</html>

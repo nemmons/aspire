@@ -45,6 +45,11 @@ class RatingManualRepository(AbstractRatingManualRepository):
 
         return rating_manual
 
+    def list(self):
+        manuals = [{"id": row.id, "name": row.name, "description": row.description}
+                   for row in self.db_session.query(RatingManualModel).all()]
+        return manuals
+
     def store(self, rating_manual_id=None):
         pass
 

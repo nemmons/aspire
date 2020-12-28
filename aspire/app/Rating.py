@@ -1,4 +1,4 @@
-import os
+import os, sys
 from .domain.Rater import Rater
 from .repo import RatingManualRepository
 from aspire.app.database.engine import ConnectionManager
@@ -8,7 +8,10 @@ def rate(rating_manual_id, rating_manual_repository, rating_inputs):
     rating_manual = rating_manual_repository.get(rating_manual_id)
 
     rater = Rater(rating_manual)
-    rate_result = rater.rate(rating_inputs)
+    try:
+        rate_result = rater.rate(rating_inputs)
+    except:
+        return "Unexpected error:", sys.exc_info()[0]
 
     return rate_result
 
@@ -33,7 +36,6 @@ def rate_from_csv(rating_manual_id, file_path):
     for i, row in enumerate(rows):
         print("Processing Row #" + str(i))
         row['rate'] = rate(rating_manual_id, repository, row.copy())
-        print("Rate:" + row['rate'])
         if i == 1:
             keys = row.keys()
 

@@ -1,9 +1,12 @@
-import os
+import os, datetime
 
-from flask import Flask, render_template, _app_ctx_stack
+from flask import Flask, render_template, _app_ctx_stack, flash, redirect, url_for, send_file, request
+from werkzeug.utils import secure_filename
 from sqlalchemy.orm import scoped_session
 from aspire.app.database.engine import ConnectionManager
 from aspire.app.database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
+from aspire.app.Rating import rate_from_csv
+from aspire.app.repo.RatingManualRepository import RatingManualRepository
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
@@ -11,6 +14,7 @@ from flask_admin.contrib.sqla import ModelView
 def create_webapp(test_config=None):
     app = Flask(__name__, instance_relative_config=True,
                 instance_path=os.path.abspath(os.path.dirname(__file__)) + '/instance')
+    app.config['UPLOAD_FOLDER'] = app.instance_path + '/tmp/uploads'
 
     connection_manager = ConnectionManager()
     session_factory = connection_manager.get_session_factory()
@@ -25,8 +29,11 @@ def create_webapp(test_config=None):
 
     # ensure the instance folder exists
     try:
-        os.makedirs(app.instance_path)
+        os.makedirs(app.instance_path, exist_ok=True)
+        os.makedirs(app.instance_path + '/tmp/uploads', exist_ok=True)
     except OSError:
+        import sys
+        print("Unexpected error creating web directories:", sys.exc_info()[0])
         pass
 
     admin = Admin(app, name='Flask Rater Admin', template_mode='bootstrap3')
@@ -40,13 +47,50 @@ def create_webapp(test_config=None):
     def index():
         return render_template('index.html')
 
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    @app.route('/demo/seed-data')
+    def seed_demo_data():
+        from aspire.app.Demo import seed_demo_data
+        seed_demo_data()
+        flash('A sample rating manual has been populated into the database!')
+        return redirect(url_for('index'))
 
-    # @app.route('/rate')
-    # def rate():
-    #     Rating.rate(rating_manual_id=1, rating_manual_repository=RatingManualRepository, rating_inputs=POSTDATA)
-    #     # return JSONify([rate: rate])
+    @app.route('/demo/generate-csv')
+    def generate_demo_csv():
+        from aspire.app.Demo import generate_demo_rating_input_csv
+        timestamp = datetime.datetime.now().isoformat()
+        path = app.instance_path + '/tmp/demo-' + timestamp + '.csv'
+
+        generate_demo_rating_input_csv(path)
+        return send_file(path, as_attachment=True, attachment_filename='demo_rating_input.csv')
+
+    @app.route('/rating/csv', methods=['GET', 'POST'])
+    def csv_rating():
+        repository = RatingManualRepository(app.session)
+        manuals = repository.list()
+        if request.method == 'GET':
+            return render_template('csv_rating.html', manuals=manuals)
+
+        if 'file' not in request.files or (request.files['file'].filename == ''):
+            flash('Please select a file!')
+            return redirect(request.url)
+
+        file = request.files['file']
+
+        if not is_csv(file.filename):
+            flash('CSVs only, please!')
+            return redirect(request.url)
+
+        timestamp = datetime.datetime.now().isoformat()
+        unique_filename = file.filename.rsplit('.', 1)[0].lower() + '-' + timestamp + '.csv'
+        return_filename = file.filename.rsplit('.', 1)[0].lower() + '-results.csv'
+
+        dest_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(unique_filename))
+        file.save(dest_path)
+
+        rate_from_csv(request.form['rating_manual_id'], dest_path)
+        return send_file(dest_path, as_attachment=True, attachment_filename=return_filename)
+
+    def is_csv(filename):
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'csv'
 
     return app
