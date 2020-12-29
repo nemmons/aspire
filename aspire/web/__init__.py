@@ -4,8 +4,8 @@ from flask import Flask, render_template, _app_ctx_stack, flash, redirect, url_f
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import scoped_session
 from aspire.app.database.engine import ConnectionManager
-from aspire.app.database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual
-from aspire.app.Rating import rate_from_csv
+from aspire.app.database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual, RatingVariable
+from aspire.app.Rating import rate as rater_rate, rate_from_csv
 from aspire.app.repo.RatingManualRepository import RatingManualRepository
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -41,6 +41,7 @@ def create_webapp(test_config=None):
     admin.add_view(ModelView(RatingStep, app.session))
     admin.add_view(ModelView(RatingStepType, app.session))
     admin.add_view(ModelView(RatingStepParameter, app.session))
+    admin.add_view(ModelView(RatingVariable, app.session))
 
     # a simple page that says hello
     @app.route('/')

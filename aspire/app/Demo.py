@@ -1,5 +1,6 @@
+import json
 from aspire.app.database.engine import ConnectionManager
-from aspire.app.database.models import RatingManual, RatingStep, RatingStepParameter, RatingFactor
+from aspire.app.database.models import RatingManual, RatingStep, RatingStepParameter, RatingFactor, RatingVariable
 from aspire.app.domain.RatingStep import RatingStepType as RatingStepTypeEnum
 from aspire.app.domain.RatingStepParameter import RatingStepParameterType as RatingStepParameterTypeEnum
 
@@ -118,7 +119,7 @@ def seed_demo_data():
                     parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
                 ),
             ],
-            name='Calculate amount of insurance over 500k FACTOR',
+            name='Calculate total Amount of Insurance factor',
             step_order=5,
             target='amount_of_insurance_factor',
             conditions='{">": [{"label":"amount_of_insurance", "value":"amount_of_insurance", "type":"VARIABLE"},'
@@ -418,7 +419,8 @@ def seed_demo_data():
                     parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
                 ),
             ],
-            name='Calculate New Home + Claims Free Discount Factor',
+            name='Calculate Rate',
+            description='Multiply base rate by the factors calculated above',
             step_order=19,
             target='rate',
         ),
@@ -563,8 +565,84 @@ def seed_demo_data():
         RatingFactor(type='liability_medical_coverage', str_col_1='500000/2500', value='45'),
     ]
 
+    rating_variables = [
+        RatingVariable(
+            name="amount_of_insurance",
+            description="The amount of insurance...",
+            variable_type="integer",
+            is_input=True,
+            is_required=True,
+            constraints='80000,'
+        ),
+        RatingVariable(
+            name="territory",
+            description="The rating territory",
+            variable_type="integer",
+            is_input=True,
+            is_required=True,
+            constraints="1,5"
+        ),
+        RatingVariable(
+            name="protection_class",
+            description="The fire protection class",
+            variable_type="integer",
+            is_input=True,
+            is_required=True,
+            constraints="1,10"
+        ),
+        RatingVariable(
+            name="construction_type",
+            description="The construction type",
+            variable_type="string",
+            is_input=True,
+            is_required=True,
+            constraints=json.dumps(['Frame', 'Masonry'])
+        ),
+        RatingVariable(
+            name="underwriting_tier",
+            description="The underwriting tier",
+            variable_type="string",
+            is_input=True,
+            is_required=True,
+            constraints=json.dumps(['A', 'B', 'C', 'D'])
+        ),
+        RatingVariable(
+            name="deductible",
+            description="The deductible",
+            variable_type="string",
+            is_input=True,
+            is_required=True,
+            constraints=json.dumps(['250', '500', '1000', '5000'])
+        ),
+        RatingVariable(name="new_home", description="New home discount", variable_type='boolean', is_input=True,
+                       is_required=False, default="false"),
+        RatingVariable(name="five_years_claims_free", description="Five years claims-free discount",
+                       variable_type='boolean', is_input=True, is_required=False, default="false"),
+        RatingVariable(name="multi_policy", description="Multi-policy discount", variable_type='boolean', is_input=True,
+                       is_required=False, default="false"),
+        RatingVariable(
+            name="jewelry_coverage",
+            description="Optional coverage on jewelry",
+            variable_type="string",
+            is_input=True,
+            is_required=False,
+            constraints=json.dumps(['2500', '5000', '10000']),
+            default='2500'
+        ),
+        RatingVariable(
+            name="liability_medical_coverage",
+            description="Optional liability and medical coverage",
+            variable_type="string",
+            is_input=True,
+            is_required=False,
+            constraints=json.dumps(['100000/500', '300000/1000', '500000/2500']),
+            default='100000/500'
+        ),
+    ]
+
     rating_manual.rating_steps = rating_steps
     rating_manual.rating_factors = rating_factors
+    rating_manual.rating_variables = rating_variables
 
     session.add(rating_manual)
     session.commit()

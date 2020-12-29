@@ -8,6 +8,12 @@ from .RatingStepParameter import \
     RatingStepParameter, \
     RatingStepParameterType
 
+from .RatingVariable import \
+    BoolRatingVariable, \
+    DecimalRatingVariable, \
+    IntegerRatingVariable, \
+    StringRatingVariable
+
 from aspire.app.repo.RatingFactorRepository import AbstractRatingFactorRepository
 from aspire.app.repo.RatingManualRepository import AbstractRatingManualRepository
 
@@ -291,7 +297,7 @@ def test_rater_e2e():
                     ]
                 ),
             ]
-            return RatingManual("test", "test", rating_steps)
+            return RatingManual("test", "test", rating_steps, [])
 
         def store(self, rating_manual_id=None):
             pass
@@ -404,7 +410,7 @@ def test_rater_output():
             [RatingStepParameter('test', 100, RatingStepParameterType.LITERAL)]
         )
     ]
-    rating_manual = RatingManual('Test Rating Manual', 'for testing', rating_steps)
+    rating_manual = RatingManual('Test Rating Manual', 'for testing', rating_steps, [])
     rater = Rater.Rater(rating_manual)
 
     rate = rater.rate({})
@@ -512,5 +518,67 @@ def test_linear_interpolate_step():
             )
             with self.assertRaises(Exception):
                 step.run({'x': 5})
+
     test = MissingInterpolateValue()
     test.test()
+
+
+def test_string_rating_variable():
+    import json
+    options = ['masonry', 'masonry veneer', 'frame']
+    var = StringRatingVariable(
+        'Construction Type',
+        'The type of construction',
+        'string',
+        True,
+        True,
+        'masonry',
+        json.dumps(options),
+        14
+    )
+    assert var.options == options
+
+
+def test_decimal_rating_variable():
+    var = DecimalRatingVariable(
+        'Some decimal thing',
+        'test',
+        'decimal',
+        True,
+        True,
+        '2.50',
+        '1.25,7.25',
+        '3,2'
+    )
+    assert var.min == 1.25
+    assert var.max == 7.25
+    assert var.precision == 3
+    assert var.scale == 2
+
+
+def test_integer_rating_variable():
+    var = IntegerRatingVariable(
+        'Age of Home',
+        'The number of years since the house has been built',
+        'integer',
+        True,
+        True,
+        '15',
+        '0,250',
+        None
+    )
+    assert var.min == 0
+    assert var.max == 250
+
+    var = IntegerRatingVariable(
+        'Amount of Insurance',
+        'The amount of insurance...',
+        'integer',
+        True,
+        True,
+        None,
+        '100000,',
+        None
+    )
+    assert var.min == 100000
+    assert var.max is None

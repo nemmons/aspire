@@ -2,22 +2,25 @@ import json
 from aspire.app.database.models import RatingFactor as RatingFactorModel, \
     RatingManual as RatingManualModel, \
     RatingStep as RatingStepModel, \
-    RatingStepParameter as RatingStepParameterModel
-from aspire.app.repo import RatingFactorRepository, RatingManualRepository
+    RatingStepParameter as RatingStepParameterModel, \
+    RatingVariable as RatingVariableModel
+from . import RatingFactorRepository
+from .RatingManualRepository import RatingManualRepository, parse_structured_conditions
 from aspire.app.database.engine import setup_test_db_session
 from aspire.app.domain.RatingStep import RatingStepType
+from aspire.app.domain.RatingVariable import StringRatingVariable
 from aspire.app.domain.RatingStepCondition import ComparisonOperation
 from aspire.app.domain.RatingStepParameter import RatingStepParameterType
 
 
 def test_parsing_rating_step_conditions():
-    repo = RatingManualRepository.RatingManualRepository(None)
+    repo = RatingManualRepository(None)
 
     sample1 = json.dumps({'<': [
         {'label': 'x', 'value': 'x', 'type': 'VARIABLE'},
         {'label': '1', 'value': '1', 'type': 'LITERAL'},
     ]})
-    result1 = repo.parse_structured_conditions(json.loads(sample1))
+    result1 = parse_structured_conditions(json.loads(sample1))
     assert str(result1) == '(x < 1)'
 
     sample2 = json.dumps({
@@ -32,7 +35,7 @@ def test_parsing_rating_step_conditions():
             ]},
         ]
     })
-    result2 = repo.parse_structured_conditions(json.loads(sample2))
+    result2 = parse_structured_conditions(json.loads(sample2))
     assert str(result2) == '((x < 1) AND (y > 1))'
 
     sample3 = json.dumps({
@@ -53,7 +56,8 @@ def test_parsing_rating_step_conditions():
             ]},
         ]
     })
-    result3 = repo.parse_structured_conditions(json.loads(sample3))
+
+    result3 = parse_structured_conditions(json.loads(sample3))
     assert str(result3) == '((x < 1) AND ((y > 1) OR (z == 1)))'
 
 
@@ -123,7 +127,7 @@ def test_rating_manual_repository_factory_rating_steps():
         session = setup_test_db_session()
         rating_manual_model = create_manual_with_one_rating_step(session, int(rating_step_type))
 
-        repository = RatingManualRepository.RatingManualRepository(session)
+        repository = RatingManualRepository(session)
         rating_manual = repository.get(rating_manual_model.id)
         assert rating_manual is not None
         assert len(rating_manual.rating_steps) == 1
@@ -159,9 +163,37 @@ def test_rating_manual_repository_parse_loaded_conditions():
     session.add(manual_model)
     session.commit()
 
-    repository = RatingManualRepository.RatingManualRepository(session)
+    repository = RatingManualRepository(session)
     rating_manual = repository.get(manual_model.id)
     rating_step = rating_manual.rating_steps[0]
     rating_step_condition = rating_step.conditions
     assert type(rating_step_condition) == ComparisonOperation
     assert rating_step_condition.operator == '>'
+
+
+def test_rating_variable_factory():
+    session = setup_test_db_session()
+    manual_model = RatingManualModel(name='Test Manual')
+    manual_model.rating_variables = [
+        RatingVariableModel(
+            name='Test Rating Variable',
+            description='test',
+            variable_type='string',
+            is_input=True,
+            is_required=False,
+            default='a',
+            constraints=json.dumps(['a', 'b', 'c']),
+            length="1",
+        )
+    ]
+    session.add(manual_model)
+    session.commit()
+
+    repository = RatingManualRepository(session)
+    rating_manual = repository.get(manual_model.id)
+    rating_variable = rating_manual.rating_variables[0]
+    assert type(rating_variable) == StringRatingVariable
+    assert rating_variable.is_input is True
+    assert rating_variable.is_required is False
+    assert rating_variable.length == 1
+    assert rating_variable.options == ['a', 'b', 'c']

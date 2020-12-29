@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric, Boolean
 from sqlalchemy.orm import relationship
 from typing import List
 from .engine import Base
@@ -14,6 +14,7 @@ class RatingManual(Base):
 
     rating_steps = relationship("RatingStep", back_populates="rating_manual")
     rating_factors = relationship("RatingFactor", back_populates="rating_manual")
+    rating_variables = relationship("RatingVariable", back_populates="rating_manual")
 
     def __str__(self):
         return str(self.id) + ": " + self.name
@@ -36,6 +37,27 @@ class RatingStep(Base):
     rating_step_type = relationship("RatingStepType")
     rating_step_parameters = relationship("RatingStepParameter",
                                           back_populates="rating_step")  # type: List[RatingStepParameter]
+
+    def __str__(self):
+        return str(self.id) + ": " + self.name
+
+
+class RatingVariable(Base):
+    __tablename__ = 'rating_variables'
+
+    id = Column(Integer, primary_key=True)
+    rating_manual_id = Column(Integer, ForeignKey('rating_manuals.id'))
+    name = Column(String(50))
+    description = Column(String(255))
+    variable_type = Column(String(10))
+    is_input = Column(Boolean)
+    is_required = Column(Boolean)
+    default = Column(String(25))
+    constraints = Column(String(255))
+    length = Column(String(10))
+    created = Column(DateTime)
+
+    rating_manual = relationship("RatingManual", back_populates="rating_variables")
 
     def __str__(self):
         return str(self.id) + ": " + self.name
