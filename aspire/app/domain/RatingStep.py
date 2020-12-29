@@ -20,6 +20,8 @@ class RatingStepType(IntEnum):
 
 
 class AbstractRatingStep(ABC):
+    name: str = None
+    description: str = None
     conditions: AbstractRatingStepCondition
     target: str
 
@@ -34,6 +36,18 @@ class AbstractRatingStep(ABC):
     @abstractmethod
     def apply(self, rating_variables: dict):
         pass
+
+    def label(self, name: str = None, description: str = None):
+        self.name = name
+        self.description = description
+
+    def __str__(self):
+        if self.name is None:
+            return ''
+        label = self.name
+        if self.description is not None:
+            label += ' (' + self.description + ')'
+        return label
 
 
 class BaseArithmeticRatingStep(AbstractRatingStep):

@@ -4,15 +4,19 @@ from .repo import RatingManualRepository
 from aspire.app.database.engine import ConnectionManager
 
 
-def rate(rating_manual_id, rating_manual_repository, rating_inputs):
+def rate(rating_manual_id, rating_manual_repository, rating_inputs, report_detail=False):
     rating_manual = rating_manual_repository.get(rating_manual_id)
 
     rater = Rater(rating_manual)
     try:
-        rate_result = rater.rate(rating_inputs)
+        rate_result = rater.rate(rating_inputs, report_detail)
     except:
+        import traceback
+        traceback.print_tb(sys.exc_info()[2])
         return "Unexpected error:", sys.exc_info()[0]
 
+    if report_detail:
+        return rater.get_step_by_step_diff()
     return rate_result
 
 

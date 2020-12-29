@@ -83,6 +83,9 @@ class RatingManualRepository(AbstractRatingManualRepository):
         else:
             step = None
 
+        if step is not None:
+            step.label(data.name, data.description)
+
         return step
 
 

@@ -64,6 +64,22 @@ def create_webapp(test_config=None):
         generate_demo_rating_input_csv(path)
         return send_file(path, as_attachment=True, attachment_filename='demo_rating_input.csv')
 
+    @app.route('/rating-manuals/<int:rating_manual_id>')
+    def rating_manual(rating_manual_id: int):
+        repository = RatingManualRepository(app.session)
+        manual = repository.get(rating_manual_id)
+        return render_template('manual.html', manual=manual, rating_manual_id=rating_manual_id)
+
+    @app.route('/rate/<int:rating_manual_id>', methods=['POST'])
+    def rate(rating_manual_id: int):
+        repository = RatingManualRepository(app.session)
+        manual = repository.get(rating_manual_id)
+        inputs = request.form.to_dict()
+        results = rater_rate(rating_manual_id, repository, inputs, report_detail=True)
+        final_rate = results[-1]['rating_variables']['rate']
+        return render_template('rate_results.html', manual=manual, rating_manual_id=rating_manual_id, results=results,
+                               final_rate=final_rate)
+
     @app.route('/rating/csv', methods=['GET', 'POST'])
     def csv_rating():
         repository = RatingManualRepository(app.session)

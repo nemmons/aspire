@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aspire - Rating Manual #{{ rating_manual_id }}: {{ manual.name }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <script type="application/javascript">
+        let switchTabs = function (event) {
+            let x, i, tablinks;
+            x = document.getElementsByClassName("content-tab");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < x.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" is-active", "");
+            }
+            document.getElementById(event.currentTarget.dataset.contentTarget).style.display = "block";
+            event.currentTarget.className += " is-active";
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            let nav_tabs = document.getElementsByClassName("tab-nav");
+            for (i = 0; i < nav_tabs.length; i++) {
+                nav_tabs[i].addEventListener("click", switchTabs)
+            }
+        });
+    </script>
+</head>
+<body>
+<section class="section">
+    <div class="container">
+        <a href="/"><h1 class="title">Aspire</h1></a>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <h2 class="subtitle">Rating Manual #{{ rating_manual_id }}: {{ manual.name }}</h2>
+
+        <nav class="tabs is-centered">
+            <ul>
+                <li class="tab tab-nav is-active" data-content-target="rating-variables"><a>Rating Variables</a></li>
+                <li class="tab tab-nav" data-content-target="rating-steps"><a>Rating Steps</a></li>
+                <li class="tab tab-nav" data-content-target="rater"><a>Rate!</a></li>
+            </ul>
+        </nav>
+
+        <div id="rating-variables" class="content-tab">
+            <h4 class="title is-4">Rating Variables</h4>
+            <ul>
+                {% for rating_variable in manual.rating_variables %}
+                    <li>{{ rating_variable }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="rating-steps" class="content-tab" style="display:none">
+            <h4 class="title is-4">Rating Steps</h4>
+            {% for rating_step in manual.rating_steps %}
+                <div class="box">
+                    {{ loop.index }} - {{ rating_step.name }}<br>
+                    {{ rating_step.description }} <br>
+                    Target: {{ rating_step.target }} <br>
+
+                    {#                            Params:#}
+                    {#                           {{ rating_step.get_params }}#}
+
+                    Conditions: {{ rating_step.conditions }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="rater" class="content-tab" style="display:none">
+            <h4 class="title is-4">Rate</h4>
+            <form method="POST" action="/rate/{{ rating_manual_id }}" target="_blank">
+                {% for rating_variable in manual.rating_variables %}
+                    <div class="field">
+                        <label class="label">{{ rating_variable.name|replace('_',' ')|title() }}</label>
+                        {#                            <p class="help">{{ rating_variable.description }}</p>#}
+                        {% if rating_variable.variable_type == 'boolean' %}
+                            <div class="field">
+                                <div class="control">
+                                    <label class="radio">
+                                        <input type="radio" name="{{ rating_variable.name }}" value="yes">
+                                        Yes
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" name="{{ rating_variable.name }}" value="no">
+                                        No
+                                    </label>
+                                </div>
+                            </div>
+                        {% elif rating_variable.variable_type == 'string' and rating_variable.options %}
+                            <div class="control">
+                                <div class="select">
+                                    <select name="{{ rating_variable.name }}">
+                                        {% for option in rating_variable.options %}
+                                            <option>{{ option }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="control">
+                                <input class="input" type="text" name="{{ rating_variable.name }}">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-link">Rate!</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+</html>

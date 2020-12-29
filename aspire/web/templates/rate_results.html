@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aspire - Rating Manual #{{ rating_manual_id }}: {{ manual.name }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+</head>
+<body>
+<section class="section">
+    <div class="container">
+        <a href="/"><h1 class="title is-1">Aspire</h1></a>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <h2 class="subtitle is-2">Rating Manual #{{ rating_manual_id }}: {{ manual.name }}</h2>
+
+        <h3 class="title is-3">Rate: ${{ final_rate }}</h3>
+
+        <h4 class="title is-4">Rating Steps:</h4>
+        {% for result in results %}
+            <div class="box has-background-primary-light m-5 p-2">
+                <h5 class="title is-5">{{ loop.index0 }}: {{ result.step.name }}</h5>
+                <ul>
+                    {% for name, value in result.rating_variables.items() %}
+                        <li>
+                            {{ name }}: {{ value }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+
+    </div>
+</section>
+</body>
+</html>
