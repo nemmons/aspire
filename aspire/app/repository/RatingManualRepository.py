@@ -9,7 +9,7 @@ from aspire.app.database.models import RatingManual as RatingManualModel, Rating
 from aspire.app.domain import RatingManual, RatingStep, RatingVariable
 from aspire.app.domain.RatingStepCondition import LogicalOperation, ComparisonOperation
 from aspire.app.domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
-from aspire.app.repo import RatingFactorRepository
+from aspire.app.repository import RatingFactorRepository
 
 
 class AbstractRatingManualRepository(ABC):

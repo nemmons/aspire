@@ -6,7 +6,7 @@ from sqlalchemy.orm import scoped_session
 from aspire.app.database.engine import ConnectionManager
 from aspire.app.database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual, RatingVariable
 from aspire.app.Rating import rate as rater_rate, rate_from_csv
-from aspire.app.repo.RatingManualRepository import RatingManualRepository
+from aspire.app.repository.RatingManualRepository import RatingManualRepository
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
