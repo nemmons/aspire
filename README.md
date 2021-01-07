@@ -8,7 +8,7 @@
 
 #### Description
 
-**A** **S**imple **P**ython **I**nsurance **R**ating **E**ngine. Configure your insurance rating algorithm(s), provide your rating factors, and generate insurance rates via an web UI or batch-rate a CSV.
+**A** **S**imple **P**ython **I**nsurance **R**ating **E**ngine. Configure your insurance rating algorithm(s), provide your rating factors, and generate insurance rates via an web UI or batch-rate a CSV. For background on insurance manuals/rating, see Chapter 2 of [this Ratemaking guide (pdf)](https://www.casact.org/library/studynotes/werner_modlin_ratemaking.pdf) from the Casualty Actuary Society.
 
 #### Note
 
