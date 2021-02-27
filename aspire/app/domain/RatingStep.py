@@ -17,6 +17,9 @@ class RatingStepType(IntEnum):
     ROUND = 6
     LOOKUP = 7
     LINEAR_INTERPOLATE = 8
+    LOOP = 9,
+    SUB_RISK_SUM = 10,
+    SUB_RISK_PRODUCT = 11
 
 
 class AbstractRatingStep(ABC):
@@ -152,6 +155,7 @@ class LinearInterpolate(AbstractRatingStep):
     def __init__(self, target: str, parameters: List[RatingStepParameter],
                  rating_factor_repository: AbstractRatingFactorRepository,
                  conditions: AbstractRatingStepCondition = None):
+        print(*parameters)
         self.target = target
         self.params = parameters
         self.rating_factor_repository = rating_factor_repository
@@ -159,19 +163,21 @@ class LinearInterpolate(AbstractRatingStep):
         super().__init__()
 
     def apply(self, rating_variables: dict):
-        rating_factor_type = self.params.pop(0)
+        rating_factor_type = self.params[0]
         rating_factor_type = rating_factor_type.evaluate(rating_variables)
 
         options = None
-        if self.params[0].label == 'options':
-            options = self.parse_options(self.params.pop(0).value)
+        params_index = 1
+        if self.params[1].label == 'options':
+            options = self.parse_options(self.params[1].value)
+            params_index = 2
 
         interpolate_variable = options['interpolate']
         interpolate_column = None
 
         evaluated_params = {}
         x = None
-        for rating_step_parameter in self.params:
+        for rating_step_parameter in self.params[params_index:]:
             param = rating_step_parameter.evaluate(rating_variables)
             evaluated_params[rating_step_parameter.label] = param
             if rating_step_parameter.value == interpolate_variable:
@@ -187,14 +193,14 @@ class LinearInterpolate(AbstractRatingStep):
             {"step_down": interpolate_column}
         )
         if lower is None:
-            raise Exception("Interpolation Lookup failed to find lower value!")
+            raise Exception("Interpolation Lookup failed to find lower value for %s!" % rating_factor_type)
         upper = self.rating_factor_repository.get_factor(
             rating_factor_type,
             evaluated_params.copy(),
             {"step_up": interpolate_column}
         )
         if upper is None:
-            raise Exception("Interpolation Lookup failed to find upper value!")
+            raise Exception("Interpolation Lookup failed to find upper value for %s!" % rating_factor_type)
 
         x = float(x)
         x0 = float(getattr(lower, interpolate_column))
@@ -219,3 +225,42 @@ class LinearInterpolate(AbstractRatingStep):
             spl = option_set.split(':')
             options[spl[0]] = spl[1]
         return options
+
+
+class Loop(AbstractRatingStep):
+    def __init__(self, parameters: List[RatingStepParameter], rating_steps: List[AbstractRatingStep], conditions: AbstractRatingStepCondition = None):
+        super().__init__()
+        self.sub_risk_label = parameters[0]
+        self.rating_steps = rating_steps
+        self.conditions = conditions
+
+    def apply(self, rating_variables: dict):
+        pass
+
+
+class AbstractSubRiskReduce(AbstractRatingStep):
+    operation: operator
+
+    def __init__(self, target: str, parameters: List[RatingStepParameter], conditions: AbstractRatingStepCondition = None):
+        super().__init__()
+        self.target = target
+        self.sub_risk_label = parameters[0]
+        self.sub_risk_variable = parameters[1]
+        self.conditions = conditions
+
+    def apply(self, rating_variables: dict):
+        sub_risk_label = self.sub_risk_label.evaluate(rating_variables)
+        sub_risk_variable = self.sub_risk_variable.evaluate(rating_variables)
+
+        operands = [float(sub_risk[sub_risk_variable]) for sub_risk in rating_variables[sub_risk_label]]
+
+        rating_variables[self.target] = reduce(self.operation, operands)
+        return rating_variables
+
+
+class SubRiskSum(AbstractSubRiskReduce):
+    operation = operator.add
+
+
+class SubRiskProduct(AbstractSubRiskReduce):
+    operation = operator.mul

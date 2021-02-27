@@ -5,14 +5,16 @@ class RatingVariable(object):
     name: str
     description: str
     variable_type: str
+    sub_risk_label: str
     is_input: bool
     is_required: bool
     default: str
 
-    def __init__(self, name, description, variable_type, is_input, is_required):
+    def __init__(self, name, description, variable_type, sub_risk_label, is_input, is_required):
         self.name = name
         self.description = description
         self.variable_type = variable_type
+        self.sub_risk_label = sub_risk_label
         self.is_input = is_input
         self.is_required = is_required
 
@@ -25,8 +27,8 @@ class StringRatingVariable(RatingVariable):
     default: str
     options: list
 
-    def __init__(self, name, description, variable_type, is_input, is_required, default, constraints, length):
-        super().__init__(name, description, variable_type, is_input, is_required)
+    def __init__(self, name, description, variable_type, sub_risk_label, is_input, is_required, default, constraints, length):
+        super().__init__(name, description, variable_type, sub_risk_label, is_input, is_required)
         if length is not None:
             self.length = int(length)
         self.default = default
@@ -45,8 +47,8 @@ class DecimalRatingVariable(RatingVariable):
     max: int
     default: float
 
-    def __init__(self, name, description, variable_type, is_input, is_required, default, constraints, length):
-        super().__init__(name, description, variable_type, is_input, is_required)
+    def __init__(self, name, description, variable_type, sub_risk_label, is_input, is_required, default, constraints, length):
+        super().__init__(name, description, variable_type, sub_risk_label, is_input, is_required)
 
         self.default = float(default)
         self.min, self.max = map(convert_to_float, constraints.split(','))
@@ -58,8 +60,8 @@ class IntegerRatingVariable(RatingVariable):
     max: int
     default: int
 
-    def __init__(self, name, description, variable_type, is_input, is_required, default, constraints, length):
-        super().__init__(name, description, variable_type, is_input, is_required)
+    def __init__(self, name, description, variable_type, sub_risk_label, is_input, is_required, default, constraints, length):
+        super().__init__(name, description, variable_type, sub_risk_label, is_input, is_required)
 
         self.default = convert_to_int(default)
         self.min, self.max = map(convert_to_int, constraints.split(','))
@@ -67,8 +69,8 @@ class IntegerRatingVariable(RatingVariable):
 
 class BoolRatingVariable(RatingVariable):
 
-    def __init__(self, name, description, variable_type, is_input, is_required, default, constraints, length):
-        super().__init__(name, description, variable_type, is_input, is_required)
+    def __init__(self, name, description, variable_type, sub_risk_label, is_input, is_required, default, constraints, length):
+        super().__init__(name, description, variable_type, sub_risk_label, is_input, is_required)
 
         self.default = default
 

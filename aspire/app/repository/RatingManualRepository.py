@@ -2,7 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from typing import List
 
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, aliased
 
 from aspire.app.database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel, RatingVariable as RatingVariableModel
@@ -32,12 +32,15 @@ class RatingManualRepository(AbstractRatingManualRepository):
         self.db_session = db_session
 
     def get(self, rating_manual_id):
+        rating_step_alias = aliased(RatingStepModel)
+
         manual = self.db_session.query(RatingManualModel). \
             filter(RatingManualModel.id == rating_manual_id). \
-            options(
-            joinedload(RatingManualModel.rating_steps).joinedload(RatingStepModel.rating_step_parameters),
-            joinedload(RatingManualModel.rating_variables)
-        ).one()
+            outerjoin(RatingManualModel.rating_steps).\
+            outerjoin(RatingStepModel.loop_rating_steps.of_type(rating_step_alias)).\
+            outerjoin(RatingStepModel.rating_step_parameters).\
+            outerjoin(RatingManualModel.rating_variables).\
+            one()
 
         rating_steps = [self.factory_rating_step(rs, rating_manual_id) for rs in manual.rating_steps]
         rating_variables = [factory_rating_variable(rv) for rv in manual.rating_variables]
@@ -80,6 +83,13 @@ class RatingManualRepository(AbstractRatingManualRepository):
                                                 RatingFactorRepository.RatingFactorRepository(rating_manual_id,
                                                                                               self.db_session),
                                                 conditions)
+        elif rating_step_type == RatingStep.RatingStepType.LOOP:
+            loop_rating_steps = [self.factory_rating_step(rs, rating_manual_id) for rs in data.loop_rating_steps]
+            step = RatingStep.Loop(params, loop_rating_steps, conditions)
+        elif rating_step_type == RatingStep.RatingStepType.SUB_RISK_SUM:
+            step = RatingStep.SubRiskSum(data.target, params, conditions)
+        elif rating_step_type == RatingStep.RatingStepType.SUB_RISK_PRODUCT:
+            step = RatingStep.SubRiskProduct(data.target, params, conditions)
         else:
             step = None
 
@@ -104,6 +114,7 @@ def factory_rating_variable(rating_variable: RatingVariableModel):
         name=rating_variable.name,
         description=rating_variable.description,
         variable_type=rating_variable.variable_type,
+        sub_risk_label=rating_variable.sub_risk_label,
         is_input=rating_variable.is_input,
         is_required=rating_variable.is_required,
         default=rating_variable.default,

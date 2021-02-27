@@ -8,6 +8,11 @@ from aspire.app.domain.RatingStepParameter import RatingStepParameterType as Rat
 def seed_demo_data():
     session = ConnectionManager().get_session()
 
+    seed_homeowners_manual(session)
+    seed_auto_manual(session)
+
+
+def seed_homeowners_manual(session):
     rating_manual = RatingManual(
         name='Demo HO Manual',
         description='Example HO Manual from Chapter 2 of CAS \'Basic Ratemaking\' PDF ('
@@ -648,7 +653,225 @@ def seed_demo_data():
     session.commit()
 
 
-def generate_demo_rating_input_csv(file_path="fnord.csv"):
+def seed_auto_manual(session):
+    rating_manual = RatingManual(
+        name='Demo Auto Manual',
+        description='Oversimplified example to demonstrate a rate algorithm which loops over sub-risks ',
+    )
+
+    rating_steps = [
+        RatingStep(
+            rating_step_type_id=int(RatingStepTypeEnum.SET),
+            rating_step_parameters=[
+                RatingStepParameter(
+                    parameter_order=1,
+                    label='Base Policy Rate',
+                    value='125',
+                    parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                )
+            ],
+            name='Set Base Rate',
+            description='The base rate is a constant $125',
+            step_order=1,
+            target='base_rate'
+        ),
+        RatingStep(
+            rating_step_type_id=int(RatingStepTypeEnum.LOOP),
+            rating_step_parameters=[
+                RatingStepParameter(
+                    parameter_order=1,
+                    label='Sub Risk Label',
+                    value='vehicles',
+                    parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                ),
+            ],
+            name='Loop over vehicles',
+            description='Calculate rate per vehicle',
+            step_order=2,
+            loop_rating_steps=[
+                RatingStep(
+                    rating_step_type_id=int(RatingStepTypeEnum.SET),
+                    rating_step_parameters=[
+                        RatingStepParameter(
+                            parameter_order=1,
+                            label='Base Per-Vehicle Rate',
+                            value='300',
+                            parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                        )
+                    ],
+                    name='Set Base Per-Vehicle Rate',
+                    description='The base rate per vehicle is $300',
+                    step_order=3,
+                    target='vehicle_base_rate'
+                ),
+                RatingStep(
+                    rating_step_type_id=int(RatingStepTypeEnum.LINEAR_INTERPOLATE),
+                    rating_step_parameters=[
+                        RatingStepParameter(
+                            parameter_order=1,
+                            label='rating_factor_type',
+                            value='vehicle_age',
+                            parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                        ),
+                        RatingStepParameter(
+                            parameter_order=2,
+                            label='options',
+                            value='interpolate:vehicle_age',
+                            parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                        ),
+                        RatingStepParameter(
+                            parameter_order=3,
+                            label='num_col_1',
+                            value='vehicle_age',
+                            parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
+                        )
+                    ],
+                    name='Lookup Vehicle Age Factor',
+                    description='Performs linear interpolation from rating tables',
+                    step_order=4,
+                    target='vehicle_age_factor'
+                ),
+                RatingStep(
+                    rating_step_type_id=int(RatingStepTypeEnum.LINEAR_INTERPOLATE),
+                    rating_step_parameters=[
+                        RatingStepParameter(
+                            parameter_order=1,
+                            label='rating_factor_type',
+                            value='primary_driver_age',
+                            parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                        ),
+                        RatingStepParameter(
+                            parameter_order=2,
+                            label='options',
+                            value='interpolate:primary_driver_age',
+                            parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                        ),
+                        RatingStepParameter(
+                            parameter_order=3,
+                            label='num_col_1',
+                            value='primary_driver_age',
+                            parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
+                        )
+                    ],
+                    name='Lookup Primary Driver Age Factor',
+                    description='Performs linear interpolation from rating tables',
+                    step_order=5,
+                    target='primary_driver_age_factor'
+                ),
+                RatingStep(
+                    rating_step_type_id=int(RatingStepTypeEnum.MULTIPLY),
+                    rating_step_parameters=[
+                        RatingStepParameter(
+                            parameter_order=1,
+                            label='vehicle_base_rate',
+                            value='vehicle_base_rate',
+                            parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
+                        ),
+                        RatingStepParameter(
+                            parameter_order=1,
+                            label='vehicle_age_factor',
+                            value='vehicle_age_factor',
+                            parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
+                        ),
+                        RatingStepParameter(
+                            parameter_order=2,
+                            label='primary_driver_age_factor',
+                            value='primary_driver_age_factor',
+                            parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
+                        )
+                    ],
+                    name='Calculate total vehicle rate',
+                    description='Combine base rate with age of vehicle and age of driver factors',
+                    step_order=6,
+                    target='total_vehicle_rate',
+                ),
+            ],
+        ),
+        RatingStep(
+            rating_step_type_id=int(RatingStepTypeEnum.SUB_RISK_SUM),
+            rating_step_parameters=[
+                RatingStepParameter(
+                    parameter_order=1,
+                    label='sub risk label',
+                    value='vehicles',
+                    parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                ),
+                RatingStepParameter(
+                    parameter_order=2,
+                    label='sub risk variable',
+                    value='total_vehicle_rate',
+                    parameter_type=int(RatingStepParameterTypeEnum.LITERAL)
+                )
+            ],
+            name='Sum per-vehicle rates',
+            description='Calculate total of all per-vehicle rates',
+            step_order=7,
+            target='total_vehicle_rates',
+        ),
+        RatingStep(
+            rating_step_type_id=int(RatingStepTypeEnum.ADD),
+            rating_step_parameters=[
+                RatingStepParameter(
+                    parameter_order=1,
+                    label='base_rate',
+                    value='base_rate',
+                    parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
+                ),
+                RatingStepParameter(
+                    parameter_order=2,
+                    label='total_vehicle_rates',
+                    value='total_vehicle_rates',
+                    parameter_type=int(RatingStepParameterTypeEnum.VARIABLE)
+                )
+            ],
+            name='Calculate total premium',
+            description='Add policy base rates to total vehicle rate',
+            step_order=8,
+            target='rate',
+        ),
+    ]
+
+    rating_factors = [
+        RatingFactor(type='vehicle_age', num_col_1=0, value='1.5'),
+        RatingFactor(type='vehicle_age', num_col_1=20, value='0.5'),
+        RatingFactor(type='vehicle_age', num_col_1=50, value='0.1'),
+        RatingFactor(type='vehicle_age', num_col_1=100, value='5'),
+        RatingFactor(type='primary_driver_age', num_col_1=18, value='1.75'),
+        RatingFactor(type='primary_driver_age', num_col_1=25, value='1.00'),
+        RatingFactor(type='primary_driver_age', num_col_1=60, value='0.75'),
+        RatingFactor(type='primary_driver_age', num_col_1=100, value='3'),
+    ]
+
+    rating_variables = [
+        RatingVariable(
+            name="vehicle_age",
+            description="The amount of the vehicle..",
+            variable_type="integer",
+            is_input=True,
+            is_required=True,
+            constraints='0,100',
+            sub_risk_label='vehicles'
+        ),
+        RatingVariable(
+            name="primary_driver_age",
+            description="The age of the primary driver..",
+            variable_type="integer",
+            is_input=True,
+            is_required=True,
+            constraints="18,100",
+            sub_risk_label='vehicles'
+        ),
+    ]
+
+    rating_manual.rating_steps = rating_steps
+    rating_manual.rating_factors = rating_factors
+    rating_manual.rating_variables = rating_variables
+
+    session.add(rating_manual)
+    session.commit()
+
+
+def generate_demo_rating_input_csv(file_path="demo_input.csv"):
     import os
     from csv import DictWriter
 

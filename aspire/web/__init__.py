@@ -9,7 +9,7 @@ from aspire.app.Rating import rate as rater_rate, rate_from_csv
 from aspire.app.repository.RatingManualRepository import RatingManualRepository
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-
+from re import match
 
 def create_webapp(test_config=None):
     app = Flask(__name__, instance_relative_config=True,
@@ -68,13 +68,30 @@ def create_webapp(test_config=None):
     def rating_manual(rating_manual_id: int):
         repository = RatingManualRepository(app.session)
         manual = repository.get(rating_manual_id)
-        return render_template('manual.html', manual=manual, rating_manual_id=rating_manual_id)
+
+        sub_risk_counts = {sub_risk: int(request.args.get(sub_risk, 1)) for sub_risk in manual.get_sub_risks()}
+        return render_template('manual.html', manual=manual, rating_manual_id=rating_manual_id, sub_risk_counts=sub_risk_counts)
 
     @app.route('/rate/<int:rating_manual_id>', methods=['POST'])
     def rate(rating_manual_id: int):
         repository = RatingManualRepository(app.session)
         manual = repository.get(rating_manual_id)
-        inputs = request.form.to_dict()
+
+        request_data = request.form.to_dict()
+        inputs = {}
+
+        for field, value in request_data.items():
+            m = match(r"(\w+)\[(\d+)](\w+)", field)
+            if m:
+                sub_risk, loop_index, variable = m.group(1, 2, 3)
+                if sub_risk not in inputs:
+                    inputs[sub_risk] = []
+                while len(inputs[sub_risk]) < int(loop_index)+1:
+                    inputs[sub_risk].append({})
+                inputs[sub_risk][int(loop_index)][variable] = value
+                continue
+            inputs[field] = value
+
         results = rater_rate(rating_manual_id, repository, inputs, report_detail=True)
         final_rate = results[-1]['rating_variables']['rate']
         return render_template('rate_results.html', manual=manual, rating_manual_id=rating_manual_id, results=results,

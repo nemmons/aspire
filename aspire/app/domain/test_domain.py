@@ -1,4 +1,4 @@
-from .RatingStep import Set, Add, Subtract, Multiply, Divide, Round, Lookup, LinearInterpolate
+from .RatingStep import Set, Add, Subtract, Multiply, Divide, Round, Lookup, LinearInterpolate, Loop, SubRiskSum
 
 from .Rater import Rater
 
@@ -530,6 +530,7 @@ def test_string_rating_variable():
         'Construction Type',
         'The type of construction',
         'string',
+        None,
         True,
         True,
         'masonry',
@@ -539,11 +540,69 @@ def test_string_rating_variable():
     assert var.options == options
 
 
+def test_loop_step():
+    class MockRatingManualRepository(AbstractRatingManualRepository):
+        def __init__(self):
+            super().__init__()
+
+        def get(self, rating_manual_id=None):
+
+            rating_steps = [
+                Loop(
+                    [
+                        RatingStepParameter('loop variable', 'risks', RatingStepParameterType.LITERAL),
+                    ],
+                    [
+                        Multiply(
+                            'risk_prem',
+                            [
+                                RatingStepParameter('age', 'age', RatingStepParameterType.VARIABLE),
+                                RatingStepParameter('factor', 'age_factor', RatingStepParameterType.VARIABLE),
+                            ]
+                        ),
+                    ]
+                ),
+                SubRiskSum(
+                    'rate',
+                    [
+                        RatingStepParameter('risks', 'risks', RatingStepParameterType.LITERAL),
+                        RatingStepParameter('risk_prem', 'risk_prem', RatingStepParameterType.LITERAL),
+                    ]
+                )
+            ]
+            return RatingManual("test", "test", rating_steps, [])
+
+        def store(self, rating_manual_id=None):
+            pass
+
+    manual_repo = MockRatingManualRepository()
+    manual = manual_repo.get()
+    rater = Rater.Rater(manual)
+
+    rater.rate({
+        'age_factor': 10,
+        'risks': [
+            {'age': 5},
+            {'age': 10}
+        ]
+    }, True)
+
+    assert rater.detailed_results[-1]['rating_variables'] == {
+        'age_factor': 10,
+        'rate': 150.0,
+        'risks': [
+            {'risk_prem': '50.0', 'age': 5},
+            {'risk_prem': '100.0', 'age': 10}
+        ]
+    }
+
+
 def test_decimal_rating_variable():
     var = DecimalRatingVariable(
         'Some decimal thing',
         'test',
         'decimal',
+        None,
         True,
         True,
         '2.50',
@@ -561,6 +620,7 @@ def test_integer_rating_variable():
         'Age of Home',
         'The number of years since the house has been built',
         'integer',
+        None,
         True,
         True,
         '15',
@@ -574,6 +634,7 @@ def test_integer_rating_variable():
         'Amount of Insurance',
         'The amount of insurance...',
         'integer',
+        None,
         True,
         True,
         None,

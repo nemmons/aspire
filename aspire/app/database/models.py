@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric, Boolean
-from sqlalchemy.orm import relationship
-from typing import List
+from sqlalchemy.orm import relationship, RelationshipProperty
+from typing import List, Union
 from .engine import Base
 
 
@@ -31,12 +31,14 @@ class RatingStep(Base):
     step_order = Column(Integer)
     target = Column(String(50))
     conditions = Column(String(512))
+    rate_loop_rating_step_id = Column(Integer, ForeignKey('rating_steps.id'))
     created = Column(DateTime)
 
     rating_manual = relationship("RatingManual", back_populates="rating_steps")
     rating_step_type = relationship("RatingStepType")
     rating_step_parameters = relationship("RatingStepParameter",
                                           back_populates="rating_step")  # type: List[RatingStepParameter]
+    loop_rating_steps = relationship("RatingStep")  # type: Union[List[RatingStep], RelationshipProperty]
 
     def __str__(self):
         return str(self.id) + ": " + self.name
@@ -50,6 +52,7 @@ class RatingVariable(Base):
     name = Column(String(50))
     description = Column(String(255))
     variable_type = Column(String(10))
+    sub_risk_label = Column(String(25))
     is_input = Column(Boolean)
     is_required = Column(Boolean)
     default = Column(String(25))

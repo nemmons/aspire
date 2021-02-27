@@ -45,13 +45,13 @@
 
         <nav class="tabs is-centered">
             <ul>
-                <li class="tab tab-nav is-active" data-content-target="rating-variables"><a>Rating Variables</a></li>
+                <li class="tab tab-nav" data-content-target="rating-variables"><a>Rating Variables</a></li>
                 <li class="tab tab-nav" data-content-target="rating-steps"><a>Rating Steps</a></li>
-                <li class="tab tab-nav" data-content-target="rater"><a>Rate!</a></li>
+                <li class="tab tab-nav is-active" data-content-target="rater"><a>Rate!</a></li>
             </ul>
         </nav>
 
-        <div id="rating-variables" class="content-tab">
+        <div id="rating-variables" class="content-tab" style="display:none">
             <h4 class="title is-4">Rating Variables</h4>
             <ul>
                 {% for rating_variable in manual.rating_variables %}
@@ -74,44 +74,77 @@
                     Conditions: {{ rating_step.conditions }}
                 </div>
             {% endfor %}
-        </div>
+        </div>style="display:none"
 
-        <div id="rater" class="content-tab" style="display:none">
+        <div id="rater" class="content-tab">
             <h4 class="title is-4">Rate</h4>
+            {% if sub_risk_counts %}
+                <form method="GET" action="/rating-manuals/{{ rating_manual_id }}">
+                    {% for sub_risk, count in sub_risk_counts.items() %}
+                        <div class="field">
+                            <div class="control">
+                                <label class="label" for="{{ sub_risk }}">{{ sub_risk }}
+                                    <input class="input" type="number" name="{{ sub_risk }}" value="{{ count }}">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="control">
+                                <button class="button is-link">Reload</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </form>
+            {% endif %}
+            <hr/>
             <form method="POST" action="/rate/{{ rating_manual_id }}" target="_blank">
-                {% for rating_variable in manual.rating_variables %}
-                    <div class="field">
-                        <label class="label">{{ rating_variable.name|replace('_',' ')|title() }}</label>
-                        {#                            <p class="help">{{ rating_variable.description }}</p>#}
-                        {% if rating_variable.variable_type == 'boolean' %}
-                            <div class="field">
-                                <div class="control">
-                                    <label class="radio">
-                                        <input type="radio" name="{{ rating_variable.name }}" value="yes">
-                                        Yes
-                                    </label>
-                                    <label class="radio">
-                                        <input type="radio" name="{{ rating_variable.name }}" value="no">
-                                        No
-                                    </label>
-                                </div>
-                            </div>
-                        {% elif rating_variable.variable_type == 'string' and rating_variable.options %}
-                            <div class="control">
-                                <div class="select">
-                                    <select name="{{ rating_variable.name }}">
-                                        {% for option in rating_variable.options %}
-                                            <option>{{ option }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
+                {% for sub_risk, rating_variables in manual.get_rating_variables_by_sub_risk().items() %}
+                    {% if sub_risk %}
+                        <h1>{{ sub_risk }}</h1>
+                    {% endif %}
+                    {% for i in range(sub_risk_counts.get(sub_risk,1)) %}
+                        {% if sub_risk %}
+                            <h2>{{ sub_risk }} #{{ i + 1 }}</h2>
+                            {% set form_field_prefix = "%s[%s]" % (sub_risk, i) %}
                         {% else %}
-                            <div class="control">
-                                <input class="input" type="text" name="{{ rating_variable.name }}">
-                            </div>
+                            {% set form_field_prefix = "" %}
                         {% endif %}
-                    </div>
+                        {% for rating_variable in rating_variables %}
+                            {% set field_name = form_field_prefix + rating_variable.name %}
+                            <div class="field">
+                                <label class="label">{{ rating_variable.name|replace('_',' ')|title() }}</label>
+                                {#                            <p class="help">{{ rating_variable.description }}</p>#}
+                                {% if rating_variable.variable_type == 'boolean' %}
+                                    <div class="field">
+                                        <div class="control">
+                                            <label class="radio">
+                                                <input type="radio" name="{{ field_name }}" value="yes">
+                                                Yes
+                                            </label>
+                                            <label class="radio">
+                                                <input type="radio" name="{{ field_name }}" value="no">
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% elif rating_variable.variable_type == 'string' and rating_variable.options %}
+                                    <div class="control">
+                                        <div class="select">
+                                            <select name="{{ field_name }}">
+                                                {% for option in rating_variable.options %}
+                                                    <option>{{ option }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="control">
+                                        <input class="input" type="text" name="{{ field_name }}">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
                 {% endfor %}
                 <div class="field">
                     <div class="control">

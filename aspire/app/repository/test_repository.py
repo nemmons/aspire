@@ -14,8 +14,6 @@ from aspire.app.domain.RatingStepParameter import RatingStepParameterType
 
 
 def test_parsing_rating_step_conditions():
-    repo = RatingManualRepository(None)
-
     sample1 = json.dumps({'<': [
         {'label': 'x', 'value': 'x', 'type': 'VARIABLE'},
         {'label': '1', 'value': '1', 'type': 'LITERAL'},
@@ -124,6 +122,9 @@ def test_rating_manual_repository_factory_rating_steps():
         return manual
 
     for rating_step_type in RatingStepType:
+        if rating_step_type == RatingStepType.LOOP:
+            continue  # we test this separately below
+
         session = setup_test_db_session()
         rating_manual_model = create_manual_with_one_rating_step(session, int(rating_step_type))
 
@@ -134,6 +135,60 @@ def test_rating_manual_repository_factory_rating_steps():
         rating_step = rating_manual.rating_steps[0]
         assert rating_step.target == 'base_rate'
         assert rating_step.__class__.__name__.lower() == str(rating_step_type.name).lower().replace('_', '')
+
+
+def test_factory_loop_steps():
+    session = setup_test_db_session()
+    manual = RatingManualModel(name='Test Manual')
+    manual.rating_steps = [
+        RatingStepModel(
+            rating_step_type_id=RatingStepType.LOOP,
+            name='Rating Step Loop',
+            rating_step_parameters= [
+                RatingStepParameterModel(
+                    label='Test Filler Param 1',
+                    value='Test Filler Param 1',
+                    parameter_type=RatingStepParameterType.LITERAL
+                ),
+            ],
+            loop_rating_steps=[
+                RatingStepModel(
+                    rating_step_type_id=RatingStepType.SET,
+                    name='Loop Step 1',
+                    target='whatever',
+                    rating_step_parameters=[
+                        RatingStepParameterModel(
+                            label='Test Filler Param 1',
+                            value='Test Filler Param 1',
+                            parameter_type=RatingStepParameterType.LITERAL
+                        ),
+                    ]
+                ),
+                RatingStepModel(
+                    rating_step_type_id=RatingStepType.SET,
+                    name='Loop Step 2',
+                    target='whatever',
+                    rating_step_parameters=[
+                        RatingStepParameterModel(
+                            label='Test Filler Param 1',
+                            value='Test Filler Param 1',
+                            parameter_type=RatingStepParameterType.LITERAL
+                        ),
+                    ]
+                ),
+            ]
+        ),
+    ]
+    session.add(manual)
+    session.commit()
+
+    repository = RatingManualRepository(session)
+    rating_manual = repository.get(manual.id)
+    assert rating_manual is not None
+    assert len(rating_manual.rating_steps) == 1
+    rating_step = rating_manual.rating_steps[0]
+    assert len(rating_step.rating_steps) == 2
+    pass
 
 
 def test_rating_manual_repository_parse_loaded_conditions():
