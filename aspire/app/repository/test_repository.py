@@ -4,8 +4,8 @@ from aspire.app.database.models import RatingFactor as RatingFactorModel, \
     RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel, \
     RatingVariable as RatingVariableModel
-from . import RatingFactorRepository
-from .RatingManualRepository import RatingManualRepository, parse_structured_conditions
+from aspire.app.repository import RatingFactorRepository
+from aspire.app.repository.RatingManualRepository import RatingManualRepository, parse_structured_conditions
 from aspire.app.database.engine import setup_test_db_session
 from aspire.app.domain.rating_step import RatingStepType
 from aspire.app.domain.rating_variable import StringRatingVariable
@@ -252,3 +252,35 @@ def test_rating_variable_factory():
     assert rating_variable.is_required is False
     assert rating_variable.length == 1
     assert rating_variable.options == ['a', 'b', 'c']
+
+
+def test_custom_rating_factor_table_lookup():
+    from aspire.app.database.models import get_custom_rating_factors_model
+
+    session = setup_test_db_session()
+    engine = session.get_bind()
+
+    sql = """CREATE TABLE other_rating_factors (
+    id INTEGER NOT NULL, 
+    rating_manual_id INTEGER NOT NULL, 
+    type VARCHAR(50),
+    num_col_1 NUMERIC(12, 4),
+    value VARCHAR, 
+    PRIMARY KEY (id));
+    """
+    sql2 = """
+    insert into other_rating_factors (id, rating_manual_id, type, num_col_1, value) VALUES (1,1,'test_factor',1,'0.99');
+    """
+
+    with engine.begin() as connection:
+        connection.execute(sql)
+        connection.execute(sql2)
+
+    session.add(RatingFactorModel(rating_manual_id=1, type='test_factor', num_col_1=1, value='0.25'))
+    session.commit()
+
+    repository = RatingFactorRepository.RatingFactorRepository(1, session)
+    result = repository.lookup('test_factor', {'num_col_1': 1})
+    assert result == '0.25'
+    result = repository.lookup('test_factor', {'num_col_1': 1}, {'table': 'other_rating_factors'})
+    assert result == '0.99'
