@@ -1,5 +1,5 @@
 import os, sys
-from .domain.Rater import Rater
+from .domain.rater import Rater
 from .repository import RatingManualRepository
 from aspire.app.database.engine import ConnectionManager
 

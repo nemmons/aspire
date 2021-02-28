@@ -1,5 +1,5 @@
-from .RatingManual import RatingManual
-from .RatingStep import Loop, AbstractRatingStep
+from .rating_manual import RatingManual
+from .rating_step import Loop, AbstractRatingStep
 import copy
 from typing import List
 

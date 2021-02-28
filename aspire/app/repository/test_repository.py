@@ -7,10 +7,10 @@ from aspire.app.database.models import RatingFactor as RatingFactorModel, \
 from . import RatingFactorRepository
 from .RatingManualRepository import RatingManualRepository, parse_structured_conditions
 from aspire.app.database.engine import setup_test_db_session
-from aspire.app.domain.RatingStep import RatingStepType
-from aspire.app.domain.RatingVariable import StringRatingVariable
-from aspire.app.domain.RatingStepCondition import ComparisonOperation
-from aspire.app.domain.RatingStepParameter import RatingStepParameterType
+from aspire.app.domain.rating_step import RatingStepType
+from aspire.app.domain.rating_variable import StringRatingVariable
+from aspire.app.domain.rating_step_condition import ComparisonOperation
+from aspire.app.domain.rating_step_parameter import RatingStepParameterType
 
 
 def test_parsing_rating_step_conditions():

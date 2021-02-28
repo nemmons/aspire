@@ -2,13 +2,14 @@ import json
 from abc import ABC, abstractmethod
 from typing import List
 
-from sqlalchemy.orm import joinedload, aliased
+from sqlalchemy.orm import aliased
 
 from aspire.app.database.models import RatingManual as RatingManualModel, RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel, RatingVariable as RatingVariableModel
-from aspire.app.domain import RatingManual, RatingStep, RatingVariable
-from aspire.app.domain.RatingStepCondition import LogicalOperation, ComparisonOperation
-from aspire.app.domain.RatingStepParameter import RatingStepParameter, RatingStepParameterType
+from aspire.app.domain import rating_step, rating_variable
+from aspire.app.domain.rating_manual import RatingManual
+from aspire.app.domain.rating_step_condition import LogicalOperation, ComparisonOperation
+from aspire.app.domain.rating_step_parameter import RatingStepParameter, RatingStepParameterType
 from aspire.app.repository import RatingFactorRepository
 
 
@@ -45,7 +46,7 @@ class RatingManualRepository(AbstractRatingManualRepository):
         rating_steps = [self.factory_rating_step(rs, rating_manual_id) for rs in manual.rating_steps]
         rating_variables = [factory_rating_variable(rv) for rv in manual.rating_variables]
 
-        rating_manual = RatingManual.RatingManual(manual.name, manual.description, rating_steps, rating_variables)
+        rating_manual = RatingManual(manual.name, manual.description, rating_steps, rating_variables)
         return rating_manual
 
     def list(self):
@@ -57,39 +58,39 @@ class RatingManualRepository(AbstractRatingManualRepository):
         pass
 
     def factory_rating_step(self, data: RatingStepModel, rating_manual_id: int):
-        rating_step_type = RatingStep.RatingStepType(data.rating_step_type_id)
+        rating_step_type = rating_step.RatingStepType(data.rating_step_type_id)
 
         params = create_rating_step_parameters(data.rating_step_parameters)
         conditions = create_rating_step_conditions(data.conditions)
 
-        if rating_step_type == RatingStep.RatingStepType.SET:
-            step = RatingStep.Set(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.ADD:
-            step = RatingStep.Add(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.SUBTRACT:
-            step = RatingStep.Subtract(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.MULTIPLY:
-            step = RatingStep.Multiply(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.DIVIDE:
-            step = RatingStep.Divide(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.ROUND:
-            step = RatingStep.Round(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.LOOKUP:
-            step = RatingStep.Lookup(data.target, params,
-                                     RatingFactorRepository.RatingFactorRepository(rating_manual_id, self.db_session),
-                                     conditions)
-        elif rating_step_type == RatingStep.RatingStepType.LINEAR_INTERPOLATE:
-            step = RatingStep.LinearInterpolate(data.target, params,
-                                                RatingFactorRepository.RatingFactorRepository(rating_manual_id,
+        if rating_step_type == rating_step.RatingStepType.SET:
+            step = rating_step.Set(data.target, params, conditions)
+        elif rating_step_type == rating_step.RatingStepType.ADD:
+            step = rating_step.Add(data.target, params, conditions)
+        elif rating_step_type == rating_step.RatingStepType.SUBTRACT:
+            step = rating_step.Subtract(data.target, params, conditions)
+        elif rating_step_type == rating_step.RatingStepType.MULTIPLY:
+            step = rating_step.Multiply(data.target, params, conditions)
+        elif rating_step_type == rating_step.RatingStepType.DIVIDE:
+            step = rating_step.Divide(data.target, params, conditions)
+        elif rating_step_type == rating_step.RatingStepType.ROUND:
+            step = rating_step.Round(data.target, params, conditions)
+        elif rating_step_type == rating_step.RatingStepType.LOOKUP:
+            step = rating_step.Lookup(data.target, params,
+                                      RatingFactorRepository.RatingFactorRepository(rating_manual_id, self.db_session),
+                                      conditions)
+        elif rating_step_type == rating_step.RatingStepType.LINEAR_INTERPOLATE:
+            step = rating_step.LinearInterpolate(data.target, params,
+                                                 RatingFactorRepository.RatingFactorRepository(rating_manual_id,
                                                                                               self.db_session),
-                                                conditions)
-        elif rating_step_type == RatingStep.RatingStepType.LOOP:
+                                                 conditions)
+        elif rating_step_type == rating_step.RatingStepType.LOOP:
             loop_rating_steps = [self.factory_rating_step(rs, rating_manual_id) for rs in data.loop_rating_steps]
-            step = RatingStep.Loop(params, loop_rating_steps, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.SUB_RISK_SUM:
-            step = RatingStep.SubRiskSum(data.target, params, conditions)
-        elif rating_step_type == RatingStep.RatingStepType.SUB_RISK_PRODUCT:
-            step = RatingStep.SubRiskProduct(data.target, params, conditions)
+            step = rating_step.Loop(params, loop_rating_steps, conditions)
+        elif rating_step_type == rating_step.RatingStepType.SUB_RISK_SUM:
+            step = rating_step.SubRiskSum(data.target, params, conditions)
+        elif rating_step_type == rating_step.RatingStepType.SUB_RISK_PRODUCT:
+            step = rating_step.SubRiskProduct(data.target, params, conditions)
         else:
             step = None
 
@@ -99,27 +100,27 @@ class RatingManualRepository(AbstractRatingManualRepository):
         return step
 
 
-def factory_rating_variable(rating_variable: RatingVariableModel):
+def factory_rating_variable(rating_variable_data: RatingVariableModel):
     mappings = {
-        'boolean': RatingVariable.BoolRatingVariable,
-        'integer': RatingVariable.IntegerRatingVariable,
-        'decimal': RatingVariable.DecimalRatingVariable,
-        'string': RatingVariable.StringRatingVariable,
+        'boolean': rating_variable.BoolRatingVariable,
+        'integer': rating_variable.IntegerRatingVariable,
+        'decimal': rating_variable.DecimalRatingVariable,
+        'string': rating_variable.StringRatingVariable,
     }
 
-    if rating_variable.variable_type not in mappings.keys():
+    if rating_variable_data.variable_type not in mappings.keys():
         return None
 
-    return mappings[rating_variable.variable_type](
-        name=rating_variable.name,
-        description=rating_variable.description,
-        variable_type=rating_variable.variable_type,
-        sub_risk_label=rating_variable.sub_risk_label,
-        is_input=rating_variable.is_input,
-        is_required=rating_variable.is_required,
-        default=rating_variable.default,
-        constraints=rating_variable.constraints,
-        length=rating_variable.length,
+    return mappings[rating_variable_data.variable_type](
+        name=rating_variable_data.name,
+        description=rating_variable_data.description,
+        variable_type=rating_variable_data.variable_type,
+        sub_risk_label=rating_variable_data.sub_risk_label,
+        is_input=rating_variable_data.is_input,
+        is_required=rating_variable_data.is_required,
+        default=rating_variable_data.default,
+        constraints=rating_variable_data.constraints,
+        length=rating_variable_data.length,
     )
 
 

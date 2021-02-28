@@ -30,7 +30,7 @@ def build_database(rebuild: bool):
 @cli.command()
 def seed_demo_data():
     """Seed demo data into the database"""
-    from aspire.app.Demo import seed_demo_data
+    from aspire.app.demo import seed_demo_data
     seed_demo_data()
 
 
@@ -40,7 +40,7 @@ def seed_demo_data():
 def rate_from_csv(rating_manual_id, file_path):
     """This script opens a CSV and attempts to read each line to use as input for rating against the manual
     with the provided ID. """
-    from aspire.app.Rating import rate_from_csv
+    from aspire.app.rating import rate_from_csv
     rate_from_csv(rating_manual_id, file_path)
 
 

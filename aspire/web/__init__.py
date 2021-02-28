@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.orm import scoped_session
 from aspire.app.database.engine import ConnectionManager
 from aspire.app.database.models import RatingStep, RatingStepType, RatingStepParameter, RatingManual, RatingVariable
-from aspire.app.Rating import rate as rater_rate, rate_from_csv
+from aspire.app.rating import rate as rater_rate, rate_from_csv
 from aspire.app.repository.RatingManualRepository import RatingManualRepository
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -50,14 +50,14 @@ def create_webapp(test_config=None):
 
     @app.route('/demo/seed-data')
     def seed_demo_data():
-        from aspire.app.Demo import seed_demo_data
+        from aspire.app.demo import seed_demo_data
         seed_demo_data()
         flash('A sample rating manual has been populated into the database!')
         return redirect(url_for('index'))
 
     @app.route('/demo/generate-csv')
     def generate_demo_csv():
-        from aspire.app.Demo import generate_demo_rating_input_csv
+        from aspire.app.demo import generate_demo_rating_input_csv
         timestamp = datetime.datetime.now().isoformat()
         path = app.instance_path + '/tmp/demo-' + timestamp + '.csv'
 

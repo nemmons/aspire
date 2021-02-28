@@ -1,7 +1,7 @@
 from typing import List
 from functools import reduce
 from abc import ABC, abstractmethod
-from .RatingStepParameter import RatingStepParameter
+from .rating_step_parameter import RatingStepParameter
 
 
 class AbstractRatingStepCondition(ABC):

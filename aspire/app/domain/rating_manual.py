@@ -1,6 +1,6 @@
 from typing import List
-from .RatingStep import AbstractRatingStep
-from .RatingVariable import RatingVariable
+from .rating_step import AbstractRatingStep
+from .rating_variable import RatingVariable
 
 
 class RatingManual(object):

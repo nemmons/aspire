@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from enum import IntEnum
 from typing import List
 from ..repository.RatingFactorRepository import AbstractRatingFactorRepository
-from .RatingStepParameter import RatingStepParameter
+from .rating_step_parameter import RatingStepParameter
 from functools import reduce
-from .RatingStepCondition import AbstractRatingStepCondition
+from .rating_step_condition import AbstractRatingStepCondition
 import operator
 
 

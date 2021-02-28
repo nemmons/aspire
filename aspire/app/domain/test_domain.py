@@ -1,14 +1,14 @@
-from .RatingStep import Set, Add, Subtract, Multiply, Divide, Round, Lookup, LinearInterpolate, Loop, SubRiskSum
+from .rating_step import Set, Add, Subtract, Multiply, Divide, Round, Lookup, LinearInterpolate, Loop, SubRiskSum
 
-from .Rater import Rater
+from .rater import Rater
 
-from .RatingManual import RatingManual
+from .rating_manual import RatingManual
 
-from .RatingStepParameter import \
+from .rating_step_parameter import \
     RatingStepParameter, \
     RatingStepParameterType
 
-from .RatingVariable import \
+from .rating_variable import \
     BoolRatingVariable, \
     DecimalRatingVariable, \
     IntegerRatingVariable, \
@@ -17,9 +17,9 @@ from .RatingVariable import \
 from aspire.app.repository.RatingFactorRepository import AbstractRatingFactorRepository
 from aspire.app.repository.RatingManualRepository import AbstractRatingManualRepository
 
-from . import Rater
+from . import rater
 
-from .RatingStepCondition import ComparisonOperation, LogicalOperation
+from .rating_step_condition import ComparisonOperation, LogicalOperation
 
 from copy import deepcopy
 
@@ -304,7 +304,7 @@ def test_rater_e2e():
 
     manual_repo = MockRatingManualRepository()
     manual = manual_repo.get()
-    rater = Rater.Rater(manual)
+    rater = Rater(manual)
     result = rater.rate({'coverage': 50})
     assert result == '700.0'
 
@@ -411,7 +411,7 @@ def test_rater_output():
         )
     ]
     rating_manual = RatingManual('Test Rating Manual', 'for testing', rating_steps, [])
-    rater = Rater.Rater(rating_manual)
+    rater = Rater(rating_manual)
 
     rate = rater.rate({})
     assert rate == '100'
@@ -577,7 +577,7 @@ def test_loop_step():
 
     manual_repo = MockRatingManualRepository()
     manual = manual_repo.get()
-    rater = Rater.Rater(manual)
+    rater = Rater(manual)
 
     rater.rate({
         'age_factor': 10,

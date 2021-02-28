@@ -1,8 +1,8 @@
 import json
 from aspire.app.database.engine import ConnectionManager
 from aspire.app.database.models import RatingManual, RatingStep, RatingStepParameter, RatingFactor, RatingVariable
-from aspire.app.domain.RatingStep import RatingStepType as RatingStepTypeEnum
-from aspire.app.domain.RatingStepParameter import RatingStepParameterType as RatingStepParameterTypeEnum
+from aspire.app.domain.rating_step import RatingStepType as RatingStepTypeEnum
+from aspire.app.domain.rating_step_parameter import RatingStepParameterType as RatingStepParameterTypeEnum
 
 
 def seed_demo_data():
