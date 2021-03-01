@@ -31,7 +31,9 @@ def build_database(rebuild: bool):
 def seed_demo_data():
     """Seed demo data into the database"""
     from aspire.app.demo import seed_demo_data
-    seed_demo_data()
+    from aspire.app.database.engine import ConnectionManager
+
+    seed_demo_data(ConnectionManager().get_session())
 
 
 @cli.command(short_help="Run the Rater, using a CSV as input")

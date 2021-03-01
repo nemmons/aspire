@@ -255,8 +255,6 @@ def test_rating_variable_factory():
 
 
 def test_custom_rating_factor_table_lookup():
-    from aspire.app.database.models import get_custom_rating_factors_model
-
     session = setup_test_db_session()
     engine = session.get_bind()
 

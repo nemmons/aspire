@@ -1,13 +1,10 @@
 import json
-from aspire.app.database.engine import ConnectionManager
 from aspire.app.database.models import RatingManual, RatingStep, RatingStepParameter, RatingFactor, RatingVariable
 from aspire.app.domain.rating_step import RatingStepType as RatingStepTypeEnum
 from aspire.app.domain.rating_step_parameter import RatingStepParameterType as RatingStepParameterTypeEnum
 
 
-def seed_demo_data():
-    session = ConnectionManager().get_session()
-
+def seed_demo_data(session):
     seed_homeowners_manual(session)
     seed_auto_manual(session)
 
