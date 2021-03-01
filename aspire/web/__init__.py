@@ -1,5 +1,6 @@
-import os, datetime
-
+import datetime
+import os
+from re import match
 from flask import Flask, render_template, _app_ctx_stack, flash, redirect, url_for, send_file, request
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import scoped_session
@@ -9,7 +10,7 @@ from aspire.app.rating import rate as rater_rate, rate_from_csv
 from aspire.app.repository.RatingManualRepository import RatingManualRepository
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from re import match
+
 
 def create_webapp(test_config=None):
     app = Flask(__name__, instance_relative_config=True,

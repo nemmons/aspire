@@ -17,8 +17,8 @@ class RatingStepType(IntEnum):
     ROUND = 6
     LOOKUP = 7
     LINEAR_INTERPOLATE = 8
-    LOOP = 9,
-    SUB_RISK_SUM = 10,
+    LOOP = 9
+    SUB_RISK_SUM = 10
     SUB_RISK_PRODUCT = 11
 
 

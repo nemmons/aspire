@@ -222,7 +222,7 @@ def test_rating_manual_repository_parse_loaded_conditions():
     rating_manual = repository.get(manual_model.id)
     rating_step = rating_manual.rating_steps[0]
     rating_step_condition = rating_step.conditions
-    assert type(rating_step_condition) == ComparisonOperation
+    assert isinstance(rating_step_condition, ComparisonOperation)
     assert rating_step_condition.operator == '>'
 
 
@@ -247,7 +247,7 @@ def test_rating_variable_factory():
     repository = RatingManualRepository(session)
     rating_manual = repository.get(manual_model.id)
     rating_variable = rating_manual.rating_variables[0]
-    assert type(rating_variable) == StringRatingVariable
+    assert isinstance(rating_variable, StringRatingVariable)
     assert rating_variable.is_input is True
     assert rating_variable.is_required is False
     assert rating_variable.length == 1
