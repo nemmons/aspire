@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import IntEnum
 from typing import List
-from ..repository.RatingFactorRepository import AbstractRatingFactorRepository
+from ..repository.rating_factor_repository import AbstractRatingFactorRepository
 from .rating_step_parameter import RatingStepParameter
 from functools import reduce
 from .rating_step_condition import AbstractRatingStepCondition

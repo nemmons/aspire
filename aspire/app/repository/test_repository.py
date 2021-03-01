@@ -4,8 +4,8 @@ from aspire.app.database.models import RatingFactor as RatingFactorModel, \
     RatingStep as RatingStepModel, \
     RatingStepParameter as RatingStepParameterModel, \
     RatingVariable as RatingVariableModel
-from aspire.app.repository import RatingFactorRepository
-from aspire.app.repository.RatingManualRepository import RatingManualRepository, parse_structured_conditions
+from aspire.app.repository import rating_factor_repository
+from aspire.app.repository.rating_manual_repository import RatingManualRepository, parse_structured_conditions
 from aspire.app.database.engine import setup_test_db_session
 from aspire.app.domain.rating_step import RatingStepType
 from aspire.app.domain.rating_variable import StringRatingVariable
@@ -71,7 +71,7 @@ def test_basic_rating_factor_repository_lookup():
     ])
     session.commit()
 
-    repository = RatingFactorRepository.RatingFactorRepository(1, session)
+    repository = rating_factor_repository.RatingFactorRepository(1, session)
     result = repository.lookup('test', {'num_col_1': 2})
     assert result == '0.50'
 
@@ -86,7 +86,7 @@ def test_rating_factor_repository_stepping():
     ])
     session.commit()
 
-    repository = RatingFactorRepository.RatingFactorRepository(1, session)
+    repository = rating_factor_repository.RatingFactorRepository(1, session)
     result = repository.lookup('test', {'num_col_1': 15}, {'step_up': 'num_col_1'})
     assert result == '0.50'
 
@@ -277,7 +277,7 @@ def test_custom_rating_factor_table_lookup():
     session.add(RatingFactorModel(rating_manual_id=1, type='test_factor', num_col_1=1, value='0.25'))
     session.commit()
 
-    repository = RatingFactorRepository.RatingFactorRepository(1, session)
+    repository = rating_factor_repository.RatingFactorRepository(1, session)
     result = repository.lookup('test_factor', {'num_col_1': 1})
     assert result == '0.25'
     result = repository.lookup('test_factor', {'num_col_1': 1}, {'table': 'other_rating_factors'})

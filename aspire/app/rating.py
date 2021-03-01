@@ -1,7 +1,7 @@
 import os
 import sys
 from .domain.rater import Rater
-from .repository import RatingManualRepository
+from .repository import rating_manual_repository
 from aspire.app.database.engine import ConnectionManager
 
 
@@ -32,7 +32,7 @@ def rate_from_csv(rating_manual_id, file_path):
         rows = [row for row in reader]
 
     session = ConnectionManager().get_session()
-    repository = RatingManualRepository.RatingManualRepository(session)
+    repository = rating_manual_repository.RatingManualRepository(session)
 
     if not rows or len(rows) == 0:
         raise Exception("No Data To Process!")

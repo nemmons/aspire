@@ -10,7 +10,7 @@ from aspire.app.domain import rating_step, rating_variable
 from aspire.app.domain.rating_manual import RatingManual
 from aspire.app.domain.rating_step_condition import LogicalOperation, ComparisonOperation
 from aspire.app.domain.rating_step_parameter import RatingStepParameter, RatingStepParameterType
-from aspire.app.repository import RatingFactorRepository
+from aspire.app.repository import rating_factor_repository
 
 
 class AbstractRatingManualRepository(ABC):
@@ -77,12 +77,12 @@ class RatingManualRepository(AbstractRatingManualRepository):
             step = rating_step.Round(data.target, params, conditions)
         elif rating_step_type == rating_step.RatingStepType.LOOKUP:
             step = rating_step.Lookup(data.target, params,
-                                      RatingFactorRepository.RatingFactorRepository(rating_manual_id, self.db_session),
+                                      rating_factor_repository.RatingFactorRepository(rating_manual_id, self.db_session),
                                       conditions)
         elif rating_step_type == rating_step.RatingStepType.LINEAR_INTERPOLATE:
             step = rating_step.LinearInterpolate(data.target, params,
-                                                 RatingFactorRepository.RatingFactorRepository(rating_manual_id,
-                                                                                              self.db_session),
+                                                 rating_factor_repository.RatingFactorRepository(rating_manual_id,
+                                                                                                 self.db_session),
                                                  conditions)
         elif rating_step_type == rating_step.RatingStepType.LOOP:
             loop_rating_steps = [self.factory_rating_step(rs, rating_manual_id) for rs in data.loop_rating_steps]

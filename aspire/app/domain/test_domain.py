@@ -14,8 +14,8 @@ from .rating_variable import \
     IntegerRatingVariable, \
     StringRatingVariable
 
-from aspire.app.repository.RatingFactorRepository import AbstractRatingFactorRepository
-from aspire.app.repository.RatingManualRepository import AbstractRatingManualRepository
+from aspire.app.repository.rating_factor_repository import AbstractRatingFactorRepository
+from aspire.app.repository.rating_manual_repository import AbstractRatingManualRepository
 
 from . import rater
 
