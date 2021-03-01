@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rating Manuals</title>
+</head>
+<body>
+    <h1>Rating Manuals</h1>
+        {% for manual in manuals %}
+            <div>
+            <h3>#{{ manual.id }}: {{ manual.name }}</h3>
+            <p>{{ manual.name }}</p>
+            <a href="/rating-manuals/{{ manual.id }}">Go</a>
+            </div>
+        {% endfor %}
+</body>
+</html>

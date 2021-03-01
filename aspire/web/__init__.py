@@ -65,6 +65,13 @@ def create_webapp(test_config=None):
         generate_demo_rating_input_csv(path)
         return send_file(path, as_attachment=True, attachment_filename='demo_rating_input.csv')
 
+    @app.route('/rating-manuals/')
+    def rating_manuals():
+        repository = RatingManualRepository(app.session)
+        manuals = repository.list()
+
+        return render_template('rating_manuals.html', manuals=manuals)
+
     @app.route('/rating-manuals/<int:rating_manual_id>')
     def rating_manual(rating_manual_id: int):
         repository = RatingManualRepository(app.session)
