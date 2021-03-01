@@ -17,16 +17,19 @@ def create_webapp(test_config=None):
                 instance_path=os.path.abspath(os.path.dirname(__file__)) + '/instance')
     app.config['UPLOAD_FOLDER'] = app.instance_path + '/tmp/uploads'
 
-    connection_manager = ConnectionManager()
-    session_factory = connection_manager.get_session_factory()
-    app.session = scoped_session(session_factory, scopefunc=_app_ctx_stack.__ident_func__)
-
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
+
+    if test_config and ('session' in test_config):
+        app.session = test_config['session']
+    else:
+        connection_manager = ConnectionManager()
+        session_factory = connection_manager.get_session_factory()
+        app.session = scoped_session(session_factory, scopefunc=_app_ctx_stack.__ident_func__)
 
     # ensure the instance folder exists
     try:
@@ -52,7 +55,7 @@ def create_webapp(test_config=None):
     @app.route('/demo/seed-data')
     def seed_demo_data():
         from aspire.app.demo import seed_demo_data
-        seed_demo_data()
+        seed_demo_data(app.session)
         flash('A sample rating manual has been populated into the database!')
         return redirect(url_for('index'))
 

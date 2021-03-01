@@ -1,10 +1,12 @@
 # https://towardsdatascience.com/use-flask-and-sqlalchemy-not-flask-sqlalchemy-5a64fafe22a4
 # https://github.com/cosmicpython/code/issues/14#issuecomment-601699049
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 from yaml import safe_load
-import os
+
 
 Base = declarative_base()
 
@@ -31,6 +33,7 @@ class ConnectionManager(object):
         self.engine = create_engine(
             self.config['SQLALCHEMY_DATABASE_URI'],
             connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
             echo=False
         )
 
@@ -43,7 +46,7 @@ class ConnectionManager(object):
         return factory()
 
 
-def setup_test_db_session(sqlalchemy_uri='sqlite:///:memory:'):
+def setup_test_db_session(sqlalchemy_uri='sqlite:///:memory:') -> Session:
     from alembic import command
     from alembic.config import Config
 

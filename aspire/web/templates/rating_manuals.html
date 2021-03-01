@@ -9,9 +9,11 @@
         {% for manual in manuals %}
             <div>
             <h3>#{{ manual.id }}: {{ manual.name }}</h3>
-            <p>{{ manual.name }}</p>
+            <p>{{ manual.description }}</p>
             <a href="/rating-manuals/{{ manual.id }}">Go</a>
             </div>
+        {% else %}
+            <h3>No Rating Manuals found!</h3>
         {% endfor %}
 </body>
 </html>
