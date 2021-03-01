@@ -155,7 +155,6 @@ class LinearInterpolate(AbstractRatingStep):
     def __init__(self, target: str, parameters: List[RatingStepParameter],
                  rating_factor_repository: AbstractRatingFactorRepository,
                  conditions: AbstractRatingStepCondition = None):
-        print(*parameters)
         self.target = target
         self.params = parameters
         self.rating_factor_repository = rating_factor_repository

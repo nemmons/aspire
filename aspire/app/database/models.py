@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Numeric, Boolean
+from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, Numeric, Boolean
 from sqlalchemy.orm import relationship, RelationshipProperty
 from typing import List, Union
 from .engine import Base
@@ -110,3 +110,14 @@ class RatingFactor(Base):
     value = Column(String)
 
     rating_manual = relationship("RatingManual")
+
+
+def get_custom_rating_factors_model(table_name: str, engine):
+    class CustomModel(Base):
+        __table__ = Table(
+            table_name,
+            Base.metadata,
+            autoload_with=engine
+        )
+
+    return CustomModel
